@@ -12,7 +12,7 @@ class Cliente(Base):
     nome = Column(String(100), nullable=False)
     telefone = Column(String(15), nullable=False)
     email = Column(String(100), nullable=False, unique=True)
-    senha = Column(String(20), nullable=False)
+    senha = Column(String(75), nullable=False)
 
     def __repr__(self):
         return f"Cliente(cpf={self.cpf}, nome={self.nome}, telefone={self.telefone}, email={self.email})"
@@ -24,6 +24,7 @@ class Cliente(Base):
         self.email = self.validar_email(email)
         self.senha = self.hash_senha(senha)
     
+    @staticmethod
     def hash_senha(senha: str) -> str:
         """Gera um hash seguro para a senha"""
         salt = bcrypt.gensalt()
@@ -33,16 +34,22 @@ class Cliente(Base):
     def verificar_senha(senha: str, senha_hash: str) -> bool:
         """Verifica se a senha fornecida corresponde ao hash armazenado"""
         return bcrypt.checkpw(senha.encode(), senha_hash.encode())
-
+    
+    @staticmethod
     def limpar_cpf(cpf: str) -> str:
         """Remove pontos e traços do CPF, mantendo apenas os números."""
         return re.sub(r'\D', '', cpf) 
     
-    def validar_email(email: str) -> bool:
-        """Verifica se o e-mail tem um formato válido."""
+    @staticmethod
+    def validar_email(email: str) -> str:
+        """Verifica se o e-mail tem um formato válido e retorna o e-mail se for válido."""
         padrao_email = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
-        return re.match(padrao_email, email) is not None
+        if not re.match(padrao_email, email):
+            raise ValueError("E-mail inválido!")
+        return email
 
+    
+    @staticmethod
     def formatar_telefone(telefone: str) -> str:
         """Remove pontuações e formata o número no padrão DDD + número."""
         telefone_limpo = re.sub(r'\D', '', telefone)  # Remove tudo que não for número
