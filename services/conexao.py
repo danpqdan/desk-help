@@ -1,5 +1,6 @@
 import os
 from sqlalchemy import create_engine, inspect
+from sqlalchemy.sql import text
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import urllib
@@ -17,7 +18,6 @@ class Database:
         self.engine = create_engine(self.database_url, echo=True)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
         
-
     def criar_tabelas(self):
         """Cria todas as tabelas no banco de dados se não existirem"""
         inspector = inspect(self.engine)
@@ -32,12 +32,9 @@ class Database:
         self.adicionar_usuario_teste()
 
     def get_conexao(self):
-        """Gera uma sessão de banco de dados"""
+        """Gera uma sessão de banco de dados e retorna a instância"""
         db = self.SessionLocal()
-        try:
-            yield db
-        finally:
-            db.close()
+        return db
             
     def adicionar_usuario_teste(self):
         """Adiciona um usuário de teste se não houver nenhum cadastrado"""
@@ -64,5 +61,30 @@ class Database:
             session.rollback()
             print(f"Erro ao criar usuário de teste: {e}")
         
+        finally:
+            session.close()
+
+
+    def encontrar_um(self, sql_query: str, params: dict = None):
+        """Executa uma consulta SQL e retorna apenas um resultado."""
+        try:
+            with self.get_conexao() as session:
+                resultado = session.execute(text(sql_query), params).fetchone()
+                return resultado
+        except Exception as e:
+            print(f"Erro ao executar consulta: {e}")
+            return None
+        finally:
+            session.close()
+
+    def encontrar_varios(self, sql_query: str, params: dict = None):
+        """Executa uma consulta SQL e retorna uma lista de resultados."""
+        try:
+            with self.get_conexao() as session:
+                resultado = session.execute(text(sql_query), params).fetchall()
+                return resultado
+        except Exception as e:
+            print(f"Erro ao executar consulta: {e}")
+            return []
         finally:
             session.close()
