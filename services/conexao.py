@@ -4,6 +4,7 @@ import pandas as pd
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.sql import text
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
 from services.base import Base
 from model.Sacola import Sacola, SacolaProduto
@@ -119,3 +120,15 @@ class Database:
             return []
         finally:
             session.close()
+            
+    def gravar(self, sql_text: str, params: dict = None):
+        """Executa a inserção ou atualização no banco de dados."""
+        try:
+            with self.get_conexao() as session:
+                session.execute(sql_text, params)
+                session.commit()
+                return True
+        except SQLAlchemyError as e:
+            session.rollback()
+            print(f"Erro ao salvar dados: {e}")
+            return False
