@@ -1,4 +1,5 @@
 import tkinter as tk
+from telas.TelaCliente import TelaCliente
 from telas.TelaProdutos import TelaProduto
 from telas.TelaMenu import TelaMenu
 from telas.TelaLogin import TelaLogin
@@ -28,6 +29,8 @@ class App(tk.Tk):
                 frame = TelaMenu(self)
             elif frame_name == "produtos":
                 frame = TelaProduto(self)
+            elif frame_name == "clientes":
+                frame = TelaCliente(self)
             else:
                 raise ValueError(f"Frame '{frame_name}' não encontrado.")
         
@@ -51,6 +54,9 @@ class App(tk.Tk):
     
     def trocar_para_produto(self):
         self.exibir_frame("produtos")
+    
+    def trocar_para_cliente(self):
+        self.exibir_frame("clientes")
         
 
 

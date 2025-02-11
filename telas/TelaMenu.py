@@ -34,8 +34,8 @@ class TelaMenu(tk.Frame):
             self.frames[frame_class].place(x=0, y=0, relwidth=1, relheight=1)
 
     # Placeholder methods for other functionalities
-    # def show_clientes(self):
-    #     self.master.switch_to_clientes()
+    def mostrar_cliente(self):
+        self.master.trocar_para_cliente()
 
     def mostrar_produto(self):
         self.master.trocar_para_produto()

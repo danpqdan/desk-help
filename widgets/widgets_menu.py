@@ -13,7 +13,7 @@ def create_widgets_menu(self):
     menu_func = tk.Menu(self.menu_bar, tearoff=0)
     self.menu_bar.add_cascade(label="Funcionalidades", menu=menu_func)
     # Add additional functionality commands (e.g. clientes, produtos)
-    # menu_func.add_command(label="Clientes", command=self.show_clientes)
+    menu_func.add_command(label="Clientes", command=self.mostrar_cliente)
     menu_func.add_command(label="Produtos/Serviços", command=self.mostrar_produto)
     # menu_func.add_command(label="Vendas", command=self.show_vendas)
     # menu_func.add_command(label="Gestão de Acessos", command=self.show_cadlogin)
