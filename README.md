@@ -23,3 +23,8 @@ NOME_BANCO=(Banco criado préviamente)
 ```
 
 **SQLAlchemy tomará conta de iniciar as tabelas e a criação do ORM**
+
+---
+
+## **Funcionalidade:** 
+- Produtos e Serviços: Possibilidade de adicionar, remover, alterar produtos em seu próprio banco de dados. Além de ordenalos da forma que achar melhor.
