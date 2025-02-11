@@ -37,8 +37,8 @@ class TelaMenu(tk.Frame):
     # def show_clientes(self):
     #     self.master.switch_to_clientes()
 
-    # def show_produtos(self):
-    #     self.master.switch_to_produtos()
+    def mostrar_produto(self):
+        self.master.trocar_para_produto()
 
     # def show_vendas(self):
     #     self.master.switch_to_vendas()

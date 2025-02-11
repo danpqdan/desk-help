@@ -1,4 +1,5 @@
 import tkinter as tk
+from telas.TelaProdutos import TelaProduto
 from telas.TelaMenu import TelaMenu
 from telas.TelaLogin import TelaLogin
 from services.conexao import Database
@@ -25,6 +26,8 @@ class App(tk.Tk):
                 frame = TelaLogin(self)
             elif frame_name == "menu":
                 frame = TelaMenu(self)
+            elif frame_name == "produtos":
+                frame = TelaProduto(self)
             else:
                 raise ValueError(f"Frame '{frame_name}' não encontrado.")
         
@@ -45,6 +48,11 @@ class App(tk.Tk):
         
     def trocar_para_login(self):
         self.exibir_frame("login")
+    
+    def trocar_para_produto(self):
+        self.exibir_frame("produtos")
+        
+
 
 def iniciar_app():
     app = App()
