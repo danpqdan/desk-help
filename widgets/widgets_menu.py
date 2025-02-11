@@ -14,7 +14,7 @@ def create_widgets_menu(self):
     self.menu_bar.add_cascade(label="Funcionalidades", menu=menu_func)
     # Add additional functionality commands (e.g. clientes, produtos)
     # menu_func.add_command(label="Clientes", command=self.show_clientes)
-    # menu_func.add_command(label="Produtos/Serviços", command=self.show_produtos)
+    menu_func.add_command(label="Produtos/Serviços", command=self.mostrar_produto)
     # menu_func.add_command(label="Vendas", command=self.show_vendas)
     # menu_func.add_command(label="Gestão de Acessos", command=self.show_cadlogin)
     menu_func.add_separator()
