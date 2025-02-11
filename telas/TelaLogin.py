@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import *
 # import bcrypt
 from services.conexao import Database
-from model.Cliente import Cliente
+from model.Vendedor import Vendedor
 from widgets.widgets_login import create_widgets_login
 
 class TelaLogin(tk.Frame):
@@ -19,7 +19,7 @@ class TelaLogin(tk.Frame):
 
     def validasenha(self):
         """Validate login credentials and switch to menu on success."""
-        var_email = self.txtemail.get()
+        var_usuario = self.txtusuario.get()
         var_senha = self.txtsenha.get()
         try:
             db = Database()
@@ -27,12 +27,12 @@ class TelaLogin(tk.Frame):
             if not con:
                 raise ConnectionError("Não foi possível conectar ao banco de dados.")
             
-            sql_txt = f"SELECT email, nome, senha FROM clientes WHERE email = :email"
-            params = {"email": var_email}
+            sql_txt = f"SELECT usuario, senha FROM vendedores WHERE usuario = :usuario"
+            params = {"usuario": var_usuario}
             rs = db.encontrar_um(sql_query=sql_txt, params=params) 
             if rs:
-                db_email, db_nome, db_senha_hash = rs
-                if Cliente.verificar_senha(senha=var_senha, senha_hash=db_senha_hash):
+                db_usuario, db_senha_hash = rs
+                if Vendedor.verificar_senha(senha=var_senha, senha_hash=db_senha_hash):
                     lblresult = tk.Label(self.form, text="**** Acesso Permitido ***", foreground='blue', bg='#D8EAF7')
                     lblresult.place(relx=0.2, y=150)
                     self.master.switch_to_menu()
