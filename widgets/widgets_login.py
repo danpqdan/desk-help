@@ -9,10 +9,10 @@ def create_widgets_login(self):
     self.form = tk.Frame(self, bg="#D8EAF7", width=400, height=250)
     self.form.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-    lblemail = tk.Label(self.form, text="Email:", bg="#D8EAF7", font=('Calibri', 12, 'bold'))
-    lblemail.place(x=20, y=20)
-    self.txtemail = tk.Entry(self.form, font=('Calibri', 12), width=30)
-    self.txtemail.place(x=100, y=20)
+    lblusuario = tk.Label(self.form, text="Usuario:", bg="#D8EAF7", font=('Calibri', 12, 'bold'))
+    lblusuario.place(x=20, y=20)
+    self.txtusuario = tk.Entry(self.form, font=('Calibri', 12), width=30)
+    self.txtusuario.place(x=100, y=20)
 
     # Campos de senha
     lblsenha = tk.Label(self.form, text="Senha:", bg="#D8EAF7", font=('Calibri', 12, 'bold'))
@@ -34,4 +34,4 @@ def create_widgets_login(self):
     btnsair.place(x=135, y=100)
 
     self.txtsenha.bind('<Return>', lambda event: self.validasenha())
-    self.txtemail.focus_set()
+    self.txtusuario.focus_set()
