@@ -3,12 +3,8 @@ from tkinter import ttk
 # from PIL import Image, ImageTk
 
 def create_widgets_login(self):
-    larguraTela = self.master.winfo_screenwidth()
-    alturaTela = self.master.winfo_screenheight()
-    self.master.geometry(f'{larguraTela}x{alturaTela}+0+0')
-
     self.bg_label = tk.Label(self, bg="#D8EAF7")
-    self.bg_label.place(x=0, y=0, width=larguraTela, height=alturaTela)
+    self.bg_label.pack(fill=tk.BOTH)
 
     self.form = tk.Frame(self, bg="#D8EAF7", width=400, height=250)
     self.form.place(relx=0.5, rely=0.5, anchor=tk.CENTER)

@@ -1,4 +1,5 @@
 import tkinter as tk
+from telas.TelaMenu import TelaMenu
 from telas.TelaLogin import TelaLogin
 from services.conexao import Database
 
@@ -17,10 +18,13 @@ class App(tk.Tk):
     def exibir_frame(self, frame_name):
         for frame in self.frames.values():
             frame.place_forget()
+            frame.pack_forget()
 
         if frame_name not in self.frames:
             if frame_name == "login":
                 frame = TelaLogin(self)
+            elif frame_name == "menu":
+                frame = TelaMenu(self)
             else:
                 raise ValueError(f"Frame '{frame_name}' não encontrado.")
         
@@ -39,7 +43,7 @@ class App(tk.Tk):
         self.deletar_frames(exclude=['menu'])
         self.exibir_frame("menu")
         
-    def switch_to_login(self):
+    def trocar_para_login(self):
         self.exibir_frame("login")
 
 def iniciar_app():
