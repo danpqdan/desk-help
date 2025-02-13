@@ -35,7 +35,11 @@ class TelaLogin(tk.Frame):
                 if Vendedor.verificar_senha(senha=var_senha, senha_hash=db_senha_hash):
                     lblresult = tk.Label(self.form, text="**** Acesso Permitido ***", foreground='blue', bg='#D8EAF7')
                     lblresult.place(relx=0.2, y=150)
-                    self.master.trocar_para_menu()
+                    self.usuario_logado = var_usuario
+                    self.txtusuario.focus_set()
+                    self.master.trocar_para_menu(self.usuario_logado)
+                    self.txtusuario.delete(0, 'end')
+                    self.txtsenha.delete(0, 'end')
                 else:
                     lblresult = tk.Label(self.form, text="Usuário ou Senha Inválida", foreground='red', bg='#D8EAF7')
                     lblresult.place(relx=0.2, y=150)
