@@ -1,11 +1,16 @@
 import os
+import urllib
+import pandas as pd
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.sql import text
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
-import urllib
 from services.base import Base
+from model.Sacola import Sacola, SacolaProduto
+from model.ProdutoServico import ProdutoServico, TipoProdutoServico
 from model.Cliente import Cliente
+from model.Vendedor import Vendedor
 
 
 load_dotenv()
@@ -20,49 +25,76 @@ class Database:
         
     def criar_tabelas(self):
         """Cria todas as tabelas no banco de dados se não existirem"""
-        inspector = inspect(self.engine)
-        existing_tables = inspector.get_table_names()
+        Base.metadata.create_all(bind=self.engine)
+        print("Tabelas criadas com sucesso!")
+        self.conversao_de_planilha()
 
-        if not existing_tables:
-            Base.metadata.create_all(bind=self.engine)
-            print("Tabelas criadas com sucesso!")
-        else:
-            print("As tabelas já existem no banco de dados.")
-            
-        self.adicionar_usuario_teste()
 
     def get_conexao(self):
         """Gera uma sessão de banco de dados e retorna a instância"""
         db = self.SessionLocal()
         return db
             
-    def adicionar_usuario_teste(self):
+    def conversao_de_planilha(self):
         """Adiciona um usuário de teste se não houver nenhum cadastrado"""
         session = self.SessionLocal()
         try:
-            # Verifica se já existe um usuário no banco
-            usuario_existente = session.query(Cliente).first()
+            clientes = pd.read_excel('assets/Planilha Modelo de Ordem de Serviço.xlsx', sheet_name='Clientes', header=1)
+            produtos = pd.read_excel('assets/Planilha Modelo de Ordem de Serviço.xlsx', sheet_name='Produtos e Serviços', header=1)
             
-            if not usuario_existente:
-                novo_cliente = Cliente(
-                    cpf="12345678901",
-                    nome="admin",
-                    telefone="(11) 99999-9999",
-                    email="teste@email.com",
-                    senha="admin"
-                )
-                session.add(novo_cliente)
+            vendedor_existente = session.query(Vendedor).first()
+            cliente_existente = session.query(Cliente).first()
+            produto_existente = session.query(ProdutoServico).first()
+            
+            if not produto_existente:
+                for _, linha in produtos.iterrows():
+                    tipo_normalizado = str(linha['Tipo']).strip().upper()
+                    if tipo_normalizado == 'SERVICO':
+                        tipo_normalizado = 'SERVIÇO'
+                    novo_produto = ProdutoServico(
+                        codigo=linha['Código'],
+                        descricao=linha['Descrição'],
+                        tipo=tipo_normalizado,
+                        valor=linha['Valor']
+                    )
+                    novo_produto.__repr__()
+                    session.add(novo_produto)
+
                 session.commit()
-                print("Usuário de teste criado com sucesso!")
-            else:
-                print("Já existe um usuário no banco, nenhum novo foi adicionado.")
-        
+
+            elif not cliente_existente:
+                for _, linha in clientes.iterrows():
+                    novo_cliente = Cliente(
+                        cpf=linha['CPF'],
+                        nome=linha['NOME'],
+                        telefone=linha['TELEFONE'],
+                        email=linha['E-MAIL']
+                    )
+                    novo_cliente.__repr__()
+                    session.add(novo_cliente)
+
+                session.commit()
+
+            elif not vendedor_existente:
+                novo_vendedor = Vendedor(
+                    email="teste@teste.com",
+                    nome="admin",
+                    senha="admin",
+                    usuario="admin"
+                )
+                novo_vendedor.__repr__()
+                session.add(novo_vendedor)
+                session.commit()
+
+            print("Migração realizada com sucesso!")
+
         except Exception as e:
             session.rollback()
-            print(f"Erro ao criar usuário de teste: {e}")
-        
+            print(f"Erro na conversão de planilha: {e}")
+
         finally:
             session.close()
+
 
 
     def encontrar_um(self, sql_query: str, params: dict = None):
