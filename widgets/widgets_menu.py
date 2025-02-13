@@ -2,21 +2,23 @@ import tkinter as tk
 from tkinter import messagebox
 
 def create_widgets_menu(self):
-    """Create the widgets for the main menu."""
+    """Cria os widgets do menu principal."""
     
-    self.bg_label = tk.Label(self, bg="#D8EAF7")
-    self.bg_label.pack(fill=tk.BOTH, expand=True)
-    
+    self.container = tk.Frame(self, bg="#D8EAF7")
+    self.container.pack(fill=tk.BOTH, expand=True)
+
+    self.bg_label = tk.Label(self.container, text="Bem-vindo ao Sistema", bg="#D8EAF7", font=("Arial", 16))
+    self.bg_label.pack(pady=20)
+
     self.menu_bar = tk.Menu(self)
-    self.master.config(menu=self.menu_bar)
+    self.config(menu=self.menu_bar)
     
     menu_func = tk.Menu(self.menu_bar, tearoff=0)
     self.menu_bar.add_cascade(label="Funcionalidades", menu=menu_func)
-    # Add additional functionality commands (e.g. clientes, produtos)
+    
     menu_func.add_command(label="Clientes", command=self.mostrar_cliente)
     menu_func.add_command(label="Produtos/Serviços", command=self.mostrar_produto)
-    # menu_func.add_command(label="Vendas", command=self.show_vendas)
-    # menu_func.add_command(label="Gestão de Acessos", command=self.show_cadlogin)
+    menu_func.add_command(label="Vendas", command=self.mostrar_vendas)
     menu_func.add_separator()
     menu_func.add_command(label="Sair", command=self.sair_app)
 
