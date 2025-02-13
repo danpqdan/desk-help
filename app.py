@@ -48,7 +48,7 @@ class App(tk.Tk):
         self.withdraw()
         self.menu = TelaMenu(self)
         self.menu.mainloop()
-
+ 
     def trocar_para_login(self):
         """Reexibe a tela de login e fecha o menu"""
         if hasattr(self, "menu"):
