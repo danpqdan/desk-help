@@ -62,7 +62,7 @@ class TelaCliente(tk.Frame):
             "email": var_email
         }
 
-        if con.gravar(sql_text, params):
+        if con.executar(sql_text, params):
             messagebox.showinfo("Aviso", "Item Gravado com Sucesso", parent=self.master)
             self.limpar()
         else:
@@ -76,7 +76,7 @@ class TelaCliente(tk.Frame):
             con = Database()
             sql_text = f"delete from clientes where cpf = :cpf"
             params = var_cpf
-            if con.gravar(sql_text, params):
+            if con.executar(sql_text, params):
                 messagebox.showinfo("Aviso", "Item Excluido com Sucesso", parent=self.master)
                 self.limpar()
             else:
