@@ -2,11 +2,15 @@ import tkinter as tk
 from tkinter import messagebox
 from widgets.widgets_menu import create_widgets_menu
 
-class TelaMenu(tk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
+class TelaMenu(tk.Frame):  # Alterado para Frame
+    def __init__(self, master, vendedor):
+        super().__init__(master)  # Usar master em vez de Toplevel
         self.master = master
-        self.master.geometry(f'{self.master.winfo_screenwidth()}x{self.master.winfo_screenheight()}+0+0')
+        self.vendedor = vendedor
+        self.config(bg="#D8EAF7")
+        self.master.title("Menu Principal")
+        # self.geometry(f'{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0')
+
         self.frames = {}
         self.create_widgets()
 
@@ -19,29 +23,13 @@ class TelaMenu(tk.Frame):
     def sair_app(self):
         var_sair = messagebox.askyesno("Sair", "Tem certeza que deseja sair?")
         if var_sair:
-            self.master.destroy()
-            
-    def mostrar_frames(self, frame_class):
-        """Switch between frames in the menu."""
-        for frame in self.frames.values():
-            frame.place_forget()
+            self.master.trocar_para_login()
 
-        if frame_class not in self.frames:
-            frame = frame_class(self.master)
-            self.frames[frame_class] = frame
-            frame.place(x=0, y=0, relwidth=1, relheight=1)
-        else:
-            self.frames[frame_class].place(x=0, y=0, relwidth=1, relheight=1)
+    def mostrar_cliente(self):
+        self.master.trocar_para_cliente(self.vendedor)
 
-    # Placeholder methods for other functionalities
-    # def show_clientes(self):
-    #     self.master.switch_to_clientes()
+    def mostrar_produto(self):
+        self.master.trocar_para_produto(self.vendedor)
 
-    # def show_produtos(self):
-    #     self.master.switch_to_produtos()
-
-    # def show_vendas(self):
-    #     self.master.switch_to_vendas()
-
-    # def show_cadlogin(self):
-    #     self.master.switch_to_cadlogin()
+    def mostrar_vendas(self):
+        self.master.trocar_para_vendas(self.vendedor)
