@@ -5,12 +5,14 @@ from telas.TelaProdutos import TelaProduto
 from telas.TelaVenda import TelaVenda
 from widgets.widgets_menu import create_widgets_menu
 
-class TelaMenu(tk.Toplevel):  # Alterado para Toplevel
-    def __init__(self, master):
+class TelaMenu(tk.Frame):
+    def __init__(self, master, vendedor):
         super().__init__(master)
         self.master = master
-        self.title("Menu Principal")
-        self.geometry(f'{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0')
+        self.vendedor = vendedor
+        self.config(bg="#D8EAF7")
+        self.master.title("Menu Principal")
+        # self.geometry(f'{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0')
 
         self.frames = {}
         self.create_widgets()
@@ -27,23 +29,11 @@ class TelaMenu(tk.Toplevel):  # Alterado para Toplevel
         if var_sair:
             self.master.trocar_para_login()
 
-    def mostrar_frames(self, frame_class):
-        """Alterna entre os frames internos"""
-        for frame in self.frames.values():
-            frame.place_forget()
-
-        if frame_class not in self.frames:
-            frame = frame_class(self)
-            self.frames[frame_class] = frame
-            frame.place(x=0, y=0, relwidth=1, relheight=1)
-        else:
-            self.frames[frame_class].place(x=0, y=0, relwidth=1, relheight=1)
-
     def mostrar_cliente(self):
-        self.mostrar_frames(TelaCliente)
+        self.master.trocar_para_cliente(self.vendedor)
 
     def mostrar_produto(self):
-        self.mostrar_frames(TelaProduto)
+        self.master.trocar_para_produto(self.vendedor)
 
     def mostrar_vendas(self):
-        self.mostrar_frames(TelaVenda)
+        self.master.trocar_para_vendas(self.vendedor)

@@ -18,8 +18,8 @@ class App(tk.Tk):
 
     def configurar_tela(self):
         self.config(bg="#D8EAF7")
-        
-    def exibir_frame(self, frame_name):
+
+    def exibir_frame(self, frame_name, vendedor=None):
         for frame in self.frames.values():
             frame.place_forget()
             frame.pack_forget()
@@ -28,7 +28,13 @@ class App(tk.Tk):
             if frame_name == "login":
                 frame = TelaLogin(self)
             elif frame_name == "menu":
-                frame = TelaMenu(self)
+                frame = TelaMenu(self, vendedor)
+            elif frame_name == "Tela de Clientes":
+                frame = TelaCliente(self, vendedor)
+            elif frame_name == "Tela de Vendas":
+                frame = TelaVenda(self, vendedor)
+            elif frame_name == "Tela de Produtos":
+                frame = TelaProduto(self, vendedor)
             else:
                 raise ValueError(f"Frame '{frame_name}' não encontrado.")
         
@@ -37,24 +43,25 @@ class App(tk.Tk):
         else:
             self.frames[frame_name].pack(expand=True, fill=tk.BOTH)
 
-    def deletar_frames(self, exclude=[]):
-        for key, frame in list(self.frames.items()):
-            if key not in exclude:
-                frame.destroy()
-                del self.frames[key] 
+    def trocar_para_menu(self, vendedor):
+        self.exibir_frame("menu", vendedor)
 
-    def trocar_para_menu(self):
-        """Fecha a tela de login e abre o menu"""
-        self.withdraw()
-        self.menu = TelaMenu(self)
-        self.menu.mainloop()
- 
     def trocar_para_login(self):
-        """Reexibe a tela de login e fecha o menu"""
-        if hasattr(self, "menu"):
-            self.menu.destroy()
-        self.deiconify()
+        if "menu" in self.frames:
+            self.frames["menu"].destroy()
+            del self.frames["menu"]
         self.exibir_frame("login")
+        
+    def trocar_para_cliente(self, vendedor):
+        self.exibir_frame('Tela de Clientes', vendedor)
+        
+    def trocar_para_produto(self, vendedor):
+        self.exibir_frame('Tela de Produtos', vendedor)
+        
+    def trocar_para_vendas(self, vendedor):
+        self.exibir_frame('Tela de Vendas', vendedor)
+        
+
 
 def iniciar_app():
     app = App()
@@ -65,8 +72,5 @@ def iniciar_conexao():
     db_instance.criar_tabelas()
 
 if __name__ == "__main__":
-    # connection_thread = threading.Thread(target=iniciar_conexao, daemon=True)
-    # connection_thread.start()
-    # connection_thread.join()
     iniciar_conexao()
     iniciar_app()
