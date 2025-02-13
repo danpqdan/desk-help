@@ -65,11 +65,7 @@ class TelaProduto(tk.Frame):
             "valor": var_valor
         }
 
-<<<<<<< Updated upstream
-        if con.gravar(sql_text=sql_text, params=params):
-=======
         if con.executar(sql_text=sql_text, params=params):
->>>>>>> Stashed changes
             messagebox.showinfo("Aviso", "Item Gravado com Sucesso", parent=self.master)
             self.limpar()
         else:
@@ -81,11 +77,7 @@ class TelaProduto(tk.Frame):
             var_codigo = self.txtcodigo.get()
             con = Database()
             sql_text = f"delete from produtos_servicos where codigo = '{var_codigo}'"
-<<<<<<< Updated upstream
-            if con.gravar(sql_text):
-=======
             if con.executar(sql_text):
->>>>>>> Stashed changes
                 messagebox.showinfo("Aviso", "Item Excluído com Sucesso", parent=self.master)
                 self.limpar()
             else:

@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
-from sqlalchemy import Column, ForeignKey, Integer, String
-=======
 from sqlalchemy import Column, Float, ForeignKey, Integer, String
->>>>>>> Stashed changes
 from sqlalchemy.orm import relationship
 from services.base import Base
 
@@ -28,13 +24,10 @@ class SacolaProduto(Base):
 
     sacola_id = Column(Integer, ForeignKey('sacolas.id'), primary_key=True)
     produto_id = Column(String(13), ForeignKey('produtos_servicos.codigo'), primary_key=True)
-<<<<<<< Updated upstream
-=======
     lin_venda = Column(Integer, primary_key=True)
     quantidade = Column(Integer, nullable=False)
     valor_unit = Column(Float, nullable=False)
     total = Column(Float, nullable=False)
->>>>>>> Stashed changes
 
     # Relacionando a Sacola e ProdutoServico
     sacola = relationship('Sacola', back_populates='produtos')
