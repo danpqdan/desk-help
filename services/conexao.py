@@ -96,7 +96,6 @@ class Database:
             session.close()
 
 
-
     def encontrar_um(self, sql_query: str, params: dict = None):
         """Executa uma consulta SQL e retorna apenas um resultado."""
         try:
@@ -113,22 +112,12 @@ class Database:
         """Executa uma consulta SQL e retorna uma lista de resultados."""
         try:
             with self.get_conexao() as session:
-                resultado = session.execute(text(sql_query), params).fetchall()
+                print(f"Executando consulta: {sql_query} com params: {params}")  # Adicionando log
+                resultado = session.execute(sql_query, params).fetchall()
+                print(f"Resultado da consulta: {resultado}")  # Log do resultado
                 return resultado
         except Exception as e:
             print(f"Erro ao executar consulta: {e}")
             return []
         finally:
             session.close()
-            
-    def executar(self, sql_text: str, params: dict = None):
-        """Executa a inserção ou atualização no banco de dados."""
-        try:
-            with self.get_conexao() as session:
-                session.execute(sql_text, params)
-                session.commit()
-                return True
-        except SQLAlchemyError as e:
-            session.rollback()
-            print(f"Erro ao salvar dados: {e}")
-            return False
