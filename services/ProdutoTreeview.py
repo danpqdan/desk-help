@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+
+from sqlalchemy import text
 from services.conexao import Database
 
 class ProdutoTreeview:
@@ -69,7 +71,7 @@ class ProdutoTreeview:
 
     def visualizar(self):
         con=Database()
-        sql_txt = "select * from produtos_servicos order by descricao"
+        sql_txt = text("select * from produtos_servicos order by descricao")
         rs=con.encontrar_varios(sql_txt)
 
         self.tree.bind("<Double-1>", self.duplo_click)
@@ -83,7 +85,7 @@ class ProdutoTreeview:
     def pesquisar_nome(self, p):
         con = Database()
         try:
-            sql_txt = f"select * from produtos_servicos where descricao like '%{p}%'"
+            sql_txt = text(f"select * from produtos_servicos where descricao like '%{p}%'")
             rs = con.encontrar_varios(sql_txt)
 
             for linha in self.tree.get_children():

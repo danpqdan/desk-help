@@ -6,17 +6,14 @@ from services.ClienteTreeview import ClienteTreeview
 
 def create_widgets_cliente(self):
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-
-    self.larguraTela = self.master.winfo_screenwidth()
-    self.alturaTela = self.master.winfo_screenheight()
-    self.master.geometry(f'{self.larguraTela}x{self.alturaTela}+0+0')
     
     self.master.title("Help-desk - Cadastro de Clientes")
-    
+    larguraTela = self.winfo_screenwidth()
+    alturaTela = self.winfo_screenheight()
     self.bg_label = tk.Label(self, bg="#D8EAF7")
     self.bg_label.pack(fill=tk.BOTH, expand=True)
     
-    self.form = tk.Frame(self, bg="#D8EAF7", width=self.larguraTela/2, height=self.alturaTela)
+    self.form = tk.Frame(self, bg="#D8EAF7", width=larguraTela/2, height=alturaTela)
     self.form.place(relx=1.0, rely=0.7, anchor='e')
 
     limite_campo = self.master.register(self.limitar_tamanho)

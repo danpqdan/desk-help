@@ -8,9 +8,10 @@ from services.conexao import Database
 from widgets.widgets_cliente import create_widgets_cliente
 
 class TelaCliente(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, vendedor):
         super().__init__(master)
         self.master = master
+        self.vendedor = vendedor
         self.create_widgets()
 
     def create_widgets(self):
@@ -27,7 +28,7 @@ class TelaCliente(tk.Frame):
         self.txtcpf.delete(0, "end")
 
         con = Database()
-        sql_txt = f"select cpf, nome, telefone, email from clientes where cpf = :cpf"
+        sql_txt = text(f"select cpf, nome, telefone, email from clientes where cpf = :cpf")
         params = var_cpf
         rs = con.encontrar_um(sql_txt, params=params)
         if rs:
@@ -47,7 +48,7 @@ class TelaCliente(tk.Frame):
         var_email = self.txtemail.get()
 
         con = Database()
-        sql_txt = "SELECT cpf, nome, telefone, email FROM clientes WHERE cpf = :cpf"
+        sql_txt = text("SELECT cpf, nome, telefone, email FROM clientes WHERE cpf = :cpf")
         params = {"cpf": var_cpf}
         rs = con.encontrar_um(sql_txt, params)
 
@@ -74,7 +75,7 @@ class TelaCliente(tk.Frame):
             var_cpf = self.txtcpf.get()
 
             con = Database()
-            sql_text = f"delete from clientes where cpf = :cpf"
+            sql_text = text(f"delete from clientes where cpf = :cpf")
             params = var_cpf
             if con.executar(sql_text, params):
                 messagebox.showinfo("Aviso", "Item Excluido com Sucesso", parent=self.master)
@@ -87,7 +88,7 @@ class TelaCliente(tk.Frame):
             self.limpar()
 
     def menu(self): 
-        self.master.trocar_para_menu()
+        self.master.trocar_para_menu(self.vendedor)
 
     def atualizar_filds(self, fields, valores):
         if len(valores) == len(fields):
