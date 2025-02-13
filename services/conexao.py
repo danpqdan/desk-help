@@ -121,7 +121,7 @@ class Database:
         finally:
             session.close()
             
-    def gravar(self, sql_text: str, params: dict = None):
+    def executar(self, sql_text: str, params: dict = None):
         """Executa a inserção ou atualização no banco de dados."""
         try:
             with self.get_conexao() as session:

@@ -1,8 +1,11 @@
 import tkinter as tk
+from telas.TelaVenda import TelaVenda
+from telas.TelaCliente import TelaCliente
 from telas.TelaProdutos import TelaProduto
 from telas.TelaMenu import TelaMenu
 from telas.TelaLogin import TelaLogin
 from services.conexao import Database
+from widgets.widgets_menu import create_widgets_menu
 
 class App(tk.Tk):
     def __init__(self):
@@ -15,7 +18,7 @@ class App(tk.Tk):
 
     def configurar_tela(self):
         self.config(bg="#D8EAF7")
-
+        
     def exibir_frame(self, frame_name):
         for frame in self.frames.values():
             frame.place_forget()
@@ -26,8 +29,6 @@ class App(tk.Tk):
                 frame = TelaLogin(self)
             elif frame_name == "menu":
                 frame = TelaMenu(self)
-            elif frame_name == "produtos":
-                frame = TelaProduto(self)
             else:
                 raise ValueError(f"Frame '{frame_name}' não encontrado.")
         
@@ -43,16 +44,17 @@ class App(tk.Tk):
                 del self.frames[key] 
 
     def trocar_para_menu(self):
-        self.deletar_frames(exclude=['menu'])
-        self.exibir_frame("menu")
-        
-    def trocar_para_login(self):
-        self.exibir_frame("login")
-    
-    def trocar_para_produto(self):
-        self.exibir_frame("produtos")
-        
+        """Fecha a tela de login e abre o menu"""
+        self.withdraw()
+        self.menu = TelaMenu(self)
+        self.menu.mainloop()
 
+    def trocar_para_login(self):
+        """Reexibe a tela de login e fecha o menu"""
+        if hasattr(self, "menu"):
+            self.menu.destroy()
+        self.deiconify()
+        self.exibir_frame("login")
 
 def iniciar_app():
     app = App()
