@@ -88,3 +88,15 @@ class Database:
             return []
         finally:
             session.close()
+            
+    def executar(self, sql_text: str, params: dict = None):
+        """Executa a inserção ou atualização no banco de dados."""
+        try:
+            with self.get_conexao() as session:
+                session.execute(sql_text, params)
+                session.commit()
+                return True
+        except SQLAlchemyError as e:
+            session.rollback()
+            print(f"Erro ao salvar dados: {e}")
+            return False
