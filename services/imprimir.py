@@ -46,7 +46,7 @@ class PedidoVenda:
         cnv.drawString(200, 760, "Data do Pedido:   " + d3)
         cnv.drawString(450, 760, "Vendedor: " + self.vendedor)
 
-        cnv.drawString(10, 745, "Código do Cliente: " + self.txtclicpf.get())
+        cnv.drawString(10, 745, "CPF do Cliente: " + self.txtclicpf.get())
         cnv.drawString(200, 745, "Nome do Cliente:  " + self.txtnomecli.get())
         cnv.setLineWidth(1)
         cnv.line(0, 720, 595, 720)
@@ -86,7 +86,6 @@ class PedidoVenda:
         
         linha -= 30
         cnv.setFont('Times-Roman', 10)
-        cnv.drawString(10, linha, "Regras de Serviço:")
 
         self.quebrar_texto(cnv, texto_regras, 10, linha - 12, width)
         

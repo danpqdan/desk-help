@@ -108,7 +108,10 @@ class TelaVenda(tk.Frame):
                 self.txtvendedor.delete(0, "end")
                 self.txtvendedor.insert(0, vendedor)
                 self.txtvendedor.config(state="disabled")
-            
+            else:
+                self.txtvendedor.delete(0, "end")
+                self.txtvendedor.insert(0, self.vendedor)
+                self.txtvendedor.config(state="disabled")            
             # Atualizar cliente se existir
             if cliente:
                 self.txtclicpf.delete(0, "end")
@@ -136,13 +139,14 @@ class TelaVenda(tk.Frame):
             try:
                 self.limpar_cab()
                 self.txtsacolaid.config(state="normal")
+                self.txtsacolaid.delete(0, "end")
+                self.txtsacolaid.insert(0, num_venda)
+                self.txtsacolaid.config(state="disabled")
                 self.txtvendedor.delete(0, "end")
                 self.txtvendedor.insert(0, vendedor)
                 self.txtvendedor.config(state="disabled")
-                self.txtsacolaid.config(state="disabled")
 
 
-                # Correção: 'vendeddor' -> 'vendedor'
                 sql_insert = text("INSERT INTO sacolas (id, vendedor_usuario) VALUES (:id, :vendedor)")
                 resultado = con.executar(sql_insert, {"id": num_venda, "vendedor": vendedor})
 
@@ -285,27 +289,6 @@ class TelaVenda(tk.Frame):
             print(f"Sacola {num_venda} e seus produtos foram excluídos com sucesso!")
         except Exception as e:
             print(f"Erro ao excluir sacola e produtos: {e}")
-
-
-    # def visualizar(self):
-    #     con = Database()
-    #     num_venda = self.txtsacolaid.get()
-    #     print("Num_venda", num_venda)
-    #     sql_txt = text('''SELECT A.lin_venda, A.produto_id, B.descricao, A.quantidade, A.valor_unit, A.total
-    #              FROM sacola_produto A
-    #              JOIN produtos_servicos B ON A.produto_id = B.codigo
-    #              WHERE A.sacola_id = :sacola_id
-    #              ORDER BY A.sacola_id, A.lin_venda''')
-    #     rs = con.encontrar_varios(sql_txt, {'sacola_id': num_venda})
-    #     if rs is None:
-    #         messagebox.showerror("Erro", "Não foi possível consultar as vendas.")
-    #         return
-    #     for linha in self.tree.get_children():
-    #         self.tree.delete(linha)
-    #     for linha in rs:
-    #         self.tree.insert("", tk.END, values=tuple(linha))
-
-        
 
     def total(self):
         con = Database()

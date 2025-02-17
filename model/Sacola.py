@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Float, ForeignKey, Integer, String
+from datetime import UTC, datetime
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from services.base import Base
 
@@ -9,6 +10,7 @@ class Sacola(Base):
     vendedor_usuario = Column(String(255), ForeignKey('vendedores.usuario'), nullable=False)  # Altere para String
     cliente_cpf = Column(String(11), ForeignKey('clientes.cpf'), nullable=False)
     produtos = relationship('SacolaProduto', back_populates='sacola')
+    horario = Column(DateTime, default=lambda: datetime.now(UTC))
 
     def __init__(self, vendedor_id, cliente_id, produtos=None):
         self.vendedor_id = vendedor_id
