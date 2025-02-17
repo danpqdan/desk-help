@@ -4,10 +4,9 @@ from tkinter import messagebox
 from tkinter import ttk
 
 from sqlalchemy import text
-from services.VendaTreeview import VendaTreeview
+from services.VendaTreeview import VendaSacolaTreeview
 from services.ClienteTreeview import ClienteTreeview
 from services.ProdutoTreeview import ProdutoTreeview
-from services.VendaTreeview import VendaTreeview
 from services.conexao import Database
 # from services.func_imprimir_vendas import imprimir
 from widgets.widgets_venda import create_widgets_vendas
@@ -89,54 +88,77 @@ class TelaVenda(tk.Frame):
     def numeracao(self):
         con = Database()
         self.txtsacolaid.config(state="normal")
-        encontrar_nulo = text('''SELECT id, vendedor_usuario, cliente_cpf FROM sacolas WHERE vendedor_usuario IS NULL OR cliente_cpf IS NULL;''')
+
+        # Buscar sacolas onde vendedor ou cliente estão nulos
+        encontrar_nulo = text('''SELECT id, vendedor_usuario, cliente_cpf FROM sacolas 
+                                WHERE vendedor_usuario IS NULL OR cliente_cpf IS NULL;''')
         dados_nulo = con.encontrar_varios(encontrar_nulo)
+
         if dados_nulo:
-            sacola_id, vendedor, cliente = tuple(dados_nulo[0])
+            print(f"Sacola encontrada com valores nulos: {dados_nulo}")
+            sacola_id, vendedor, cliente = tuple(dados_nulo[0])  # Pega o primeiro registro válido
+            
+            # Atualizar txtsacolaid
             self.txtsacolaid.delete(0, "end")
             self.txtsacolaid.insert(0, sacola_id)
+            
+            # Atualizar vendedor se existir
             if vendedor:
                 self.txtvendedor.delete(0, "end")
-                self.txtsacolaid.insert(0, vendedor)
-                self.txtsacolaid.config(state="disabled")
+                self.txtvendedor.insert(0, vendedor)
+                self.txtvendedor.config(state="disabled")
+            
+            # Atualizar cliente se existir
             if cliente:
-                self.txtvendedor.delete(0, "end")
-                self.txtsacolaid.insert(0, cliente)
-                self.txtsacolaid.config(state="disabled")
+                self.txtclicpf.delete(0, "end")
+                self.txtclicpf.insert(0, cliente)
+                self.bus_cli()
+                self.txtclicpf.config(state="disabled")
         else:
+            print("Nenhuma sacola com valores nulos encontrada. Criando nova sacola...")
             self.nova_sacola()
-        self.txtsacolaid.config(state="disabled")
+
             
     def nova_sacola(self):
         con = Database()
-        self.txtsacolaid.config(state="normal")
+        vendedor = self.vendedor        
         sql_txt = "SELECT COALESCE(MAX(id), 0) AS id FROM sacolas"
         rs = con.encontrar_um(sql_txt)
+        
         if rs:
-            num_venda = rs[0]  
+            num_venda = rs[0]
             if num_venda == 0:
                 num_venda = 1
-                try:
-                    sql_insert = text("""INSERT INTO sacolas (id) VALUES (:id)""")
-                    con.executar(sql_insert, {"id": num_venda})
-                    print(f"Nova sacola criada com num_venda: {num_venda}")
-                except Exception as e:
-                    messagebox.showerror("Erro", f"Erro ao criar nova sacola: {e}")
-                    return
             else:
                 num_venda += 1
-                try:
-                    sql_insert = text("""INSERT INTO sacolas (id) VALUES (:id)""")
-                    con.executar(sql_insert, {"id": num_venda})
-                    print(f"Nova sacola criada com num_venda: {num_venda}")
-                except Exception as e:
-                    messagebox.showerror("Erro", f"Erro ao criar nova sacola: {e}")
-                    return
-        
-            self.txtsacolaid.delete(0, "end")
-            self.txtsacolaid.insert(0, num_venda)
-        self.txtsacolaid.config(state="disabled")
 
+            try:
+                self.limpar_cab()
+                self.txtsacolaid.config(state="normal")
+                self.txtvendedor.delete(0, "end")
+                self.txtvendedor.insert(0, vendedor)
+                self.txtvendedor.config(state="disabled")
+                self.txtsacolaid.config(state="disabled")
+
+
+                # Correção: 'vendeddor' -> 'vendedor'
+                sql_insert = text("INSERT INTO sacolas (id, vendedor_usuario) VALUES (:id, :vendedor)")
+                resultado = con.executar(sql_insert, {"id": num_venda, "vendedor": vendedor})
+
+                if resultado:
+                    print(f"Nova sacola criada com num_venda: {num_venda}")
+                else:
+                    print("Erro ao inserir a nova sacola no banco.")
+
+                self.tree.limpar_arv()
+                self.txtsacolaid.delete(0, "end")
+                self.txtsacolaid.insert(0, num_venda)
+                print(f"Campo txtsacolaid atualizado para: {num_venda}")
+
+            except Exception as e:
+                messagebox.showerror("Erro", f"Erro ao criar nova sacola: {e}")
+                return
+            
 
 
     def limpar(self, event=None):
@@ -232,7 +254,8 @@ class TelaVenda(tk.Frame):
     def excluir(self):
         con = Database()
         txtsacolaid = self.txtsacolaid.get()
-        item = self.tree.item(self.tree.selection())
+        item = self.tree.limpar_lin()
+        print("Item retornado:", item)
         
         try:
             lin_venda = item['values'][0]
@@ -456,6 +479,8 @@ class TelaVenda(tk.Frame):
             self.numeracao()
             self.tree.visualizar()
             self.total()
+            self.txtsacolaid.config(state="disabled")
+
     
     def menu(self):
         self.master.trocar_para_menu(self.vendedor)

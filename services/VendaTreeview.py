@@ -7,11 +7,11 @@ from sqlalchemy import text
 from services.conexao import Database
 
 
-class VendaTreeview:
+class VendaSacolaTreeview:
     def __init__(self, tela_venda):
         self.tela_venda = tela_venda
         self.selected_data = None
-        self.tre = None
+        self.tree = None
         self.tela_venda.update_idletasks()
         self.larguraTela = self.tela_venda.winfo_screenwidth()
         self.alturaTela = self.tela_venda.winfo_screenheight()
@@ -76,3 +76,28 @@ class VendaTreeview:
             self.tree.delete(linha)
         for linha in rs:
             self.tree.insert("", tk.END, values=tuple(linha))
+            
+    def limpar_arv(self):
+        for linha in self.tree.get_children():
+            self.tree.delete(linha)
+            
+    def limpar_lin(self):
+        item_selecionado = self.tree.selection()
+        if item_selecionado:
+            item = self.tree.item(item_selecionado)
+            self.tree.delete(item_selecionado)
+            return item
+
+        return None
+            
+    def duplo_click(self, event):
+        item_selecionado = self.tree.selection()
+        if item_selecionado:
+            valores = self.tree.item(item_selecionado[0], "values")
+            return valores 
+        return []
+
+
+class SacolaTreeView:
+    def __init__(self):
+        pass

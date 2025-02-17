@@ -1,6 +1,6 @@
 import tkinter as tk
 import locale
-from services.VendaTreeview import VendaTreeview
+from services.VendaTreeview import VendaSacolaTreeview
 
 def create_widgets_vendas(self):
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -20,7 +20,7 @@ def create_widgets_vendas(self):
     self.txtsacolaid.place(relx=0.3, rely=0.1, width=100, height=20)
     # , command=self.abrir_popup_busca_vendas
     btnbusvendas = tk.Button(self.cabecalho, text="Buscar venda", bg='black', foreground='white', font=('Calibri', 12, 'bold'))
-    btnbusvendas.place(relx=0.2, rely=0.5, width=120, height=30)
+    btnbusvendas.place(relx=0.2, rely=0.6, width=120, height=30)
 
     lblcodcli = tk.Label(self.cabecalho, text="Cod. Cliente:", font=('Calibri', 12, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
     lblcodcli.place(relx=0.1, rely=0.2, width=100, height=20)
@@ -30,7 +30,7 @@ def create_widgets_vendas(self):
     self.txtclicpf.bind('<Return>', self.bus_cli)
 
     btnbuscli = tk.Button(self.cabecalho, text="Buscar cliente", bg='black', foreground='white', font=('Calibri', 12, 'bold'), command=self.abrir_popup_busca_cliente)
-    btnbuscli.place(relx=0.5, rely=0.5, width=120, height=30)
+    btnbuscli.place(relx=0.5, rely=0.6, width=120, height=30)
 
     lblnomecli = tk.Label(self.cabecalho, text="Nome Cliente:", font=('Calibri', 12, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
     lblnomecli.place(relx=0.1, rely=0.3, width=100, height=20)
@@ -38,6 +38,13 @@ def create_widgets_vendas(self):
     self.txtnomecli = tk.Entry(self.cabecalho)
     self.txtnomecli.place(relx=0.3, rely=0.3, width=300, height=20)
     self.txtnomecli.config(state="disabled")
+    
+    lblvendedor = tk.Label(self.cabecalho, text="Vendedor: ", font=('Calibri', 12, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
+    lblvendedor.place(relx=0.1, rely=0.4, width=100, height=20)
+    
+    self.txtvendedor = tk.Entry(self.cabecalho)
+    self.txtvendedor.place(relx=0.3, rely=0.4, width=300, height=20)
+
 
 
     # Widgets produtos
@@ -115,6 +122,6 @@ def create_widgets_vendas(self):
     self.btnmenu = tk.Button(self, text="Menu", bg='#00FFFF', foreground='black', font=('Calibri', 12, 'bold'), command=self.menu)
     self.btnmenu.place(relx=0.60, rely=0.55, width=100, height=50)
     
-    self.tree = VendaTreeview(self)
+    self.tree = VendaSacolaTreeview(self)
 
    
