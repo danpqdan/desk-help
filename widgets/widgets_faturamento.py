@@ -3,7 +3,7 @@ from tkinter import ttk
 from sqlalchemy import text
 from tkcalendar import DateEntry
 import locale
-from services.VendaTreeview import VendaSacolaTreeview
+from services.FaturamentoTreeview import FaturamentoTreeview
 from services.conexao import Database
 
 def create_widgets_faturamento(self):
@@ -21,9 +21,6 @@ def create_widgets_faturamento(self):
     
     self.container_dados = tk.Frame(self, bg="#D8EAF7", width=largura_aside, height=altura_personalizada)
     self.container_dados.pack(side="top", fill="x")
-    
-    self.container_vis = tk.Frame(self, bg="#FFFFFF", width=largura_aside, height=alturaTela)
-    self.container_vis.pack(side="bottom", fill="both", expand=True)
     
     # Dados
     lblinformativo = tk.Label(self.container_dados, text="Dados informativos:", font=('Calibri', 16, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
@@ -92,47 +89,12 @@ def create_widgets_faturamento(self):
     self.btnlimpar.place(relx=0.5, rely=0.45, anchor="center", width=largura_personalizada - 25)
     self.btnlimpar.lift()
 
-    self.btnfiltrar = tk.Button(self.container_filtros, text="FILTRAR", bg='#D8EAF7', border=1, relief="solid")
+    self.btnfiltrar = tk.Button(self.container_filtros, text="FILTRAR", bg='#D8EAF7', border=1, relief="solid", command=self.filtrar_por_data)
     self.btnfiltrar.place(relx=0.5, rely=0.50, anchor="center", width=largura_personalizada - 25)
 
     self.btnrelatorio = tk.Button(self.container_filtros, text="RELATORIO", bg='#D8EAF7', border=1, relief="solid")
     self.btnrelatorio.place(relx=0.5, rely=0.55, anchor="center", width=largura_personalizada - 25)
 
-    
-    # Arvore
-    style = ttk.Style()
-    style.configure("mystyle.Treeview", font=("Calibri", 10))
-    style.configure("mystyle.Treeview.Heading", font=("Calibri", 12, "bold"))
-
-    tree = ttk.Treeview(
-        self.container_vis,
-        column=("#1", "#2", "#3", "#4", "#5", "#6"),
-        show='headings',
-        style="mystyle.Treeview",
-        padding=0
-        )
-    tree.column("#1", width=50, anchor='c')
-    tree.heading("#1", text="id")
-    
-    tree.column("#2", width=100, anchor='c')
-    tree.heading("#2", text="vendedor_usuario")
-    
-    tree.column("#3", width=200, anchor='w')
-    tree.heading("#3", text="cliente_cpf")
-    
-    tree.column("#4", width=50, anchor='c')
-    tree.heading("#4", text="Qts produtos")
-    
-    tree.column("#5", width=100, anchor='c')
-    tree.heading("#5", text="total")
-    
-    tree.column("#6", width=150, anchor='c')
-    tree.heading("#6", text="time_stamp")
-    
-    scrollbar = ttk.Scrollbar(self.container_vis, orient=tk.VERTICAL, command=tree.yview)
-    tree.configure(yscroll=scrollbar.set)
-    scrollbar.pack(side="right", fill="y")
-    tree.pack(side="left", fill="both", expand=True)
     
     
     obter_clientes(self)
@@ -167,4 +129,3 @@ def obter_clientes(self):
     except Exception as e:
         print(f"Erro ao obter clientes: {e}")
         self.clientes = []
-    
