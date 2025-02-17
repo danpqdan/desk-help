@@ -4,6 +4,7 @@ from tkinter import messagebox
 from tkinter import ttk
 
 from sqlalchemy import text
+from services.imprimir import PedidoVenda
 from services.VendaTreeview import VendaSacolaTreeview
 from services.ClienteTreeview import ClienteTreeview
 from services.ProdutoTreeview import ProdutoTreeview
@@ -486,5 +487,5 @@ class TelaVenda(tk.Frame):
         self.master.trocar_para_menu(self.vendedor)
 
     def hook_imprimir(self):
-        # imprimir(self=self)
-        pass
+        pedido = PedidoVenda(self.vendedor, self.txtsacolaid, self.txtclicpf, self.txtnomecli, self.tree, self.txt_total)
+        pedido.imprimir_pdf()
