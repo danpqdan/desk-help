@@ -27,8 +27,8 @@ def create_widgets_menu(self):
     # Gerencia Funcionalidades
     menu_gerencia = tk.Menu(self.menu_bar, tearoff=0)
     self.menu_bar.add_cascade(label="Controle", menu=menu_gerencia)
-    menu_gerencia.add_command(label="Estoque", command=self.mostrar_cliente)
-    menu_gerencia.add_command(label="Faturamento", command=self.mostrar_produto)
+    menu_gerencia.add_command(label="Estoque", command=self.mostrar_estoque)
+    menu_gerencia.add_command(label="Faturamento", command=self.mostrar_faturamento)
 
     # Menu Ajuda
     menu_ajuda = tk.Menu(self.menu_bar, tearoff=0)

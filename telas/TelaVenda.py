@@ -14,10 +14,11 @@ from widgets.widgets_venda import create_widgets_vendas
 
 
 class TelaVenda(tk.Frame):
-    def __init__(self, master, vendedor):
+    def __init__(self, master, vendedor, role):
         super().__init__(master)
         self.master = master
         self.vendedor = vendedor
+        self.role = role
         self.config(bg="#D8EAF7")
         self.create_widgets()        
         self.numeracao()
@@ -467,7 +468,7 @@ class TelaVenda(tk.Frame):
 
     
     def menu(self):
-        self.master.trocar_para_menu(self.vendedor)
+        self.master.trocar_para_menu(self.vendedor, self.role)
 
     def hook_imprimir(self):
         pedido = PedidoVenda(self.vendedor, self.txtsacolaid, self.txtclicpf, self.txtnomecli, self.tree, self.txt_total)
