@@ -168,28 +168,3 @@ def obter_clientes(self):
         print(f"Erro ao obter clientes: {e}")
         self.clientes = []
     
-    
-    # btnbusprod = tk.Button(self.container_filtros, text="Buscar produto", bg='#000', foreground='white', font=('Calibri', 12, 'bold'), command=self.abrir_popup_busca_prodserv)
-    # btnbusprod.place(relx=0.6, rely=0.1, width=120, height=20)
-    
-    
-    # self.txtcodprod = tk.Entry(self.produtos)
-    # self.txtcodprod.place(relx=0.3, rely=0.1, width=100, height=20)
-    # self.txtcodprod.bind('<Return>', self.bus_prod)
-
-    # lbldescricao = tk.Label(self.produtos, text="Descrição:", font=('Calibri', 12, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
-    # lbldescricao.place(relx=0.1, rely=0.2, width=100, height=20)
-
-    # self.txtdescricao = tk.Entry(self.produtos)
-    # self.txtdescricao.place(relx=0.3, rely=0.2, width=300, height=20)
-
-    # lblqtde = tk.Label(self.produtos, text="Quantidade:", font=('Calibri', 12, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
-    # lblqtde.place(relx=0.1, rely=0.3, width=100, height=20)
-
-    # self.txtqtde = tk.Entry(self.produtos)
-    # self.txtqtde.place(relx=0.3, rely=0.3, width=100, height=20)
-    # self.txtqtde.bind('<FocusOut>', self.entrar_qtde)
-    # self.txtqtde.bind('<Return>', self.entrar_qtde)
-
-
-
