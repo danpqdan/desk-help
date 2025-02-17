@@ -1,26 +1,27 @@
 # -*- coding: utf-8 -*-
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk
 
 from sqlalchemy import text
-# from services import VendasTreeview
+from services.VendaTreeview import VendaTreeview
 from services.ClienteTreeview import ClienteTreeview
 from services.ProdutoTreeview import ProdutoTreeview
-# from services.VendaTreeview import VendaTreeview
+from services.VendaTreeview import VendaTreeview
 from services.conexao import Database
 # from services.func_imprimir_vendas import imprimir
 from widgets.widgets_venda import create_widgets_vendas
 
 
 class TelaVenda(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, vendedor):
         super().__init__(master)
         self.master = master
-        
-        self.create_widgets()
+        self.vendedor = vendedor
+        self.config(bg="#D8EAF7")
+        self.create_widgets()        
         self.numeracao()
-        self.excluir_inic()
-        self.visualizar()
+        self.tree.visualizar()
         self.total()
         self.txtsacolaid.config(state="disabled")
         self.txtclicpf.focus_set()
@@ -33,7 +34,7 @@ class TelaVenda(tk.Frame):
     #     popup_busca.title("Buscar vendas")
     #     popup_busca.geometry(f"{self.master.winfo_screenwidth()}x{self.master.winfo_screenheight()}")
     #     popup_busca.resizable(True, True)
-    #     tree = VendasTreeview(popup_busca)
+    #     tree = VendaTreeview(popup_busca)
     #     tree.tree.place(x=0, y=0, width=self.master.winfo_screenwidth(), height=self.master.winfo_screenheight())
     #     def handle_duplo_click(event):
     #         valores = tree.duplo_click(event)
@@ -46,55 +47,73 @@ class TelaVenda(tk.Frame):
     #     tree.tree.bind("<Double-1>", handle_duplo_click)
         
 
-    # def abrir_popup_busca_cliente(self):
-    #     popup_busca = tk.Toplevel(self.master)
-    #     popup_busca.title("Buscar Cliente")
-    #     popup_busca.geometry(f"{self.master.winfo_screenwidth()}x{self.master.winfo_screenheight()}")
-    #     popup_busca.resizable(True, True)
-    #     tree = ClienteTreeview(popup_busca)
-    #     tree.tree.place(x=0, y=0, width=self.master.winfo_screenwidth(), height=self.master.winfo_screenheight())
+    def abrir_popup_busca_cliente(self):
+        popup_busca = tk.Toplevel(self.master)
+        popup_busca.title("Buscar Cliente")
+        popup_busca.geometry(f"{self.master.winfo_screenwidth()}x{self.master.winfo_screenheight()}")
+        popup_busca.resizable(True, True)
+        tree = ClienteTreeview(popup_busca)
+        tree.tree.pack(fill="both", expand=True)
 
-    #     def handle_duplo_click(event):
-    #         valores = tree.duplo_click(event)
-    #         print(f"Dados selecionados: {valores}")
-    #         if valores:
-    #             self.txtclicpf.delete(0, tk.END)
-    #             self.txtclicpf.insert(0, valores[0])
-    #         popup_busca.destroy()
-    #         self.txtclicpf.focus()
-    #         self.bus_cli()
-    #     tree.tree.bind("<Double-1>", handle_duplo_click)
+        def handle_duplo_click(event):
+            valores = tree.duplo_click(event)
+            print(f"Dados selecionados: {valores}")
+            if valores:
+                self.txtclicpf.delete(0, tk.END)
+                self.txtclicpf.insert(0, valores[0])
+            popup_busca.destroy()
+            self.txtclicpf.focus()
+            self.bus_cli()
+        tree.tree.bind("<Double-1>", handle_duplo_click)
 
-    # def abrir_popup_busca_prodserv(self):
-    #     popup_busca = tk.Toplevel(self.master)
-    #     popup_busca.title("Buscar Produto")
-    #     popup_busca.geometry(f"{self.master.winfo_screenwidth()}x{self.master.winfo_screenheight()}")
-    #     popup_busca.resizable(True, True)
-    #     tree = ProdutoTreeview(popup_busca)
-    #     tree.tree.place(x=0, y=0, width=(self.master.winfo_screenwidth() - 50), height=(self.master.winfo_screenheight() - 50))
+    def abrir_popup_busca_prodserv(self):
+        popup_busca = tk.Toplevel(self.master)
+        popup_busca.title("Buscar Produto")
+        popup_busca.geometry(f"{self.master.winfo_screenwidth()}x{self.master.winfo_screenheight()}")
+        popup_busca.resizable(True, True)
+        tree = ProdutoTreeview(popup_busca)
+        tree.tree.pack(fill="both", expand=True)
 
-    #     def handle_duplo_click(event):
-    #         valores = tree.duplo_click(event)
-    #         print(f"Dados selecionados: {valores}")
-    #         if valores:
-    #             self.txtcodprod.delete(0, tk.END)
-    #             self.txtcodprod.insert(0, valores[0])
-    #             self.txtcodprod.focus()
-    #         popup_busca.destroy()
-    #         self.txtclicpf.focus()
-    #         self.bus_prod()
-    #     tree.tree.bind("<Double-1>", handle_duplo_click)
+        def handle_duplo_click(event):
+            valores = tree.duplo_click(event)
+            print(f"Dados selecionados: {valores}")
+            if valores:
+                self.txtcodprod.delete(0, tk.END)
+                self.txtcodprod.insert(0, valores[0])
+                self.txtcodprod.focus()
+            popup_busca.destroy()
+            self.txtclicpf.focus()
+            self.bus_prod()
+        tree.tree.bind("<Double-1>", handle_duplo_click)
 
     def numeracao(self):
         con = Database()
         self.txtsacolaid.config(state="normal")
-        
+        encontrar_nulo = text('''SELECT id, vendedor_usuario, cliente_cpf FROM sacolas WHERE vendedor_usuario IS NULL OR cliente_cpf IS NULL;''')
+        dados_nulo = con.encontrar_varios(encontrar_nulo)
+        if dados_nulo:
+            sacola_id, vendedor, cliente = tuple(dados_nulo[0])
+            self.txtsacolaid.delete(0, "end")
+            self.txtsacolaid.insert(0, sacola_id)
+            if vendedor:
+                self.txtvendedor.delete(0, "end")
+                self.txtsacolaid.insert(0, vendedor)
+                self.txtsacolaid.config(state="disabled")
+            if cliente:
+                self.txtvendedor.delete(0, "end")
+                self.txtsacolaid.insert(0, cliente)
+                self.txtsacolaid.config(state="disabled")
+        else:
+            self.nova_sacola()
+        self.txtsacolaid.config(state="disabled")
+            
+    def nova_sacola(self):
+        con = Database()
+        self.txtsacolaid.config(state="normal")
         sql_txt = "SELECT COALESCE(MAX(id), 0) AS id FROM sacolas"
         rs = con.encontrar_um(sql_txt)
-        
         if rs:
-            num_venda = rs[0]
-            
+            num_venda = rs[0]  
             if num_venda == 0:
                 num_venda = 1
                 try:
@@ -113,11 +132,11 @@ class TelaVenda(tk.Frame):
                 except Exception as e:
                     messagebox.showerror("Erro", f"Erro ao criar nova sacola: {e}")
                     return
-            
+        
             self.txtsacolaid.delete(0, "end")
             self.txtsacolaid.insert(0, num_venda)
-        
         self.txtsacolaid.config(state="disabled")
+
 
 
     def limpar(self, event=None):
@@ -137,7 +156,18 @@ class TelaVenda(tk.Frame):
         self.txtsacolaid.delete(0, "end")
         self.txtnomecli.delete(0, "end")
         self.txtclicpf.delete(0, "end")
+        self.txtnomecli.config(state="disabled")
+        self.txtsacolaid.config(state="disabled")
         self.txtclicpf.focus_set()
+        
+    def validar_cab(self)-> bool:
+        num_venda= self.txtsacolaid.get()
+        cpf_cli= self.txtclicpf.get()
+        nome_cli=self.txtnomecli.get()
+        if not num_venda or not cpf_cli or not nome_cli:
+            return False
+        else:
+            return True
 
     def gravar_lin(self):
         con = Database()
@@ -196,7 +226,7 @@ class TelaVenda(tk.Frame):
 
     def finalizar_linha(self, event=None):
         self.gravar_lin()
-        self.visualizar()
+        self.tree.visualizar()
         self.total()
 
     def excluir(self):
@@ -206,14 +236,14 @@ class TelaVenda(tk.Frame):
         
         try:
             lin_venda = item['values'][0]
-            sql_text = '''DELETE FROM sacola_produto WHERE sacola_id = :sacola_id AND lin_venda = :lin_venda'''
+            sql_text = text('''DELETE FROM sacola_produto WHERE sacola_id = :sacola_id AND lin_venda = :lin_venda''')
             params = {
-                'num_venda': txtsacolaid,
+                'sacola_id': txtsacolaid,
                 'lin_venda': lin_venda
             }
 
-            if con.executar(sql_text, params=params):
-                self.visualizar()
+            if con.executar(sql_text, params):
+                self.tree.visualizar()
                 self.total()
             else:
                 messagebox.showerror("Erro", "Falha ao executar a exclusão.", parent=self.master)
@@ -225,30 +255,31 @@ class TelaVenda(tk.Frame):
     def excluir_inic(self):
         con = Database()
         num_venda = self.txtsacolaid.get()
-        
-        sql_text = text('''DELETE FROM sacola_produto WHERE sacola_id = :sacola_id''')
-        params = {'sacola_id': num_venda}
+        try:
+            sql_delete_produtos = text("DELETE FROM sacola_produto WHERE sacola_id = :sacola_id")
+            con.executar(sql_delete_produtos, {'sacola_id': num_venda})
+            print(f"Sacola {num_venda} e seus produtos foram excluídos com sucesso!")
+        except Exception as e:
+            print(f"Erro ao excluir sacola e produtos: {e}")
 
-        con.executar(sql_text, params=params)
 
-
-    def visualizar(self):
-        con = Database()
-        num_venda = self.txtsacolaid.get()
-        print("Num_venda", num_venda)
-        sql_txt = '''SELECT A.lin_venda, A.produto_id, B.descricao, A.quantidade, A.valor_unit, A.total
-                 FROM sacola_produto A
-                 JOIN produtos_servicos B ON A.produto_id = B.codigo
-                 WHERE A.sacola_id = :sacola_id
-                 ORDER BY A.sacola_id, A.lin_venda'''
-        rs = con.encontrar_varios(sql_txt, {'sacola_id': num_venda})
-        if rs is None:
-            messagebox.showerror("Erro", "Não foi possível consultar as vendas.")
-            return
-        for linha in self.tree.get_children():
-            self.tree.delete(linha)
-        for linha in rs:
-            self.tree.insert("", tk.END, values=tuple(linha))
+    # def visualizar(self):
+    #     con = Database()
+    #     num_venda = self.txtsacolaid.get()
+    #     print("Num_venda", num_venda)
+    #     sql_txt = text('''SELECT A.lin_venda, A.produto_id, B.descricao, A.quantidade, A.valor_unit, A.total
+    #              FROM sacola_produto A
+    #              JOIN produtos_servicos B ON A.produto_id = B.codigo
+    #              WHERE A.sacola_id = :sacola_id
+    #              ORDER BY A.sacola_id, A.lin_venda''')
+    #     rs = con.encontrar_varios(sql_txt, {'sacola_id': num_venda})
+    #     if rs is None:
+    #         messagebox.showerror("Erro", "Não foi possível consultar as vendas.")
+    #         return
+    #     for linha in self.tree.get_children():
+    #         self.tree.delete(linha)
+    #     for linha in rs:
+    #         self.tree.insert("", tk.END, values=tuple(linha))
 
         
 
@@ -288,36 +319,39 @@ class TelaVenda(tk.Frame):
         con = Database()
         num_venda = self.txtsacolaid.get()
         var_codcli = self.txtclicpf.get()
-        var_vendedor = self.var_vendedor.get()
         var_total = float(self.txt_total.get())
-        sql_venda_check = f"select * from sacola where id = {num_venda}"
+        sql_venda_check = f"select * from sacolas where id = {num_venda}"
         rs = con.encontrar_um(sql_venda_check)
-        if rs:
-            sql_text = f"UPDATE sacola SET cliente_cpf = {var_codcli}, vendedor_usuario = {var_vendedor} WHERE id = {num_venda};"
-            con.executar(sql_text)
-        else:                       
-            if var_total > 0:
-                sql_get_max_num_venda = "SELECT MAX(id) FROM sacola"
-                rs_max_num = con.encontrar_um(sql_get_max_num_venda)
-                if rs_max_num:
-                    num_venda = rs_max_num[0][0] + 1
-                else:
-                    num_venda = 1
-
-                sql_text = f"INSERT INTO sacola (id, cliente_cpf, vendedor_usuario) VALUES ({num_venda}, {var_codcli}, {var_vendedor});"
-                print(sql_text)
+        if self.validar_cab():
+            if rs:
+                sql_text = text(f"UPDATE sacolas SET cliente_cpf = {var_codcli}, vendedor_usuario = '{self.vendedor}' WHERE id = {num_venda};")
                 con.executar(sql_text)
-                
-                var_del = messagebox.askyesno("Imprimir", "Deseja Imprimir a Venda?", parent=self.master)
-                if var_del:
-                    self.imprimir()
-
-                # Limpa os campos após o registro
-                self.limpar()
-                self.limpar_cab()
-                self.numeracao()
-                self.visualizar()
-                self.total()
+                messagebox.showwarning("Sucesso", f"{self.vendedor}, dados atualizado com sucesso", parent=self.master)
+                var_continuar = messagebox.askyesno("Continuar", "Deseja incluir nova Venda?", parent=self.master)
+                if var_continuar:
+                    self.nova_sacola()
+            else:                       
+                if var_total > 0:
+                    sql_get_max_num_venda = "SELECT MAX(id) FROM sacola"
+                    rs_max_num = con.encontrar_um(sql_get_max_num_venda)
+                    if rs_max_num:
+                        num_venda = rs_max_num[0][0] + 1
+                    else:
+                        num_venda = 1
+                    sql_text = text(f"INSERT INTO sacolas (id, cliente_cpf, vendedor_usuario) VALUES ({num_venda}, {var_codcli}, {self.vendedor});")
+                    print(sql_text)
+                    con.executar(sql_text)
+                    var_del = messagebox.askyesno("Imprimir", "Deseja Imprimir a Venda?", parent=self.master)
+                    if var_del:
+                        self.imprimir()
+                    self.limpar()
+                    self.limpar_cab()
+                    self.numeracao()
+                    self.tree.visualizar()
+                    self.total()
+        else:
+            messagebox.showwarning("Aviso", "Favor preencher os campos do cabeçalho", parent=self.master)
+            
             
             
     def bus_venda(self,cod_compra, event=None):
@@ -419,11 +453,12 @@ class TelaVenda(tk.Frame):
             con.executar(sql, params)
             self.limpar()
             self.limpar_cab()
-            self.visualizar()
+            self.numeracao()
+            self.tree.visualizar()
             self.total()
     
     def menu(self):
-        self.master.mudar_para_menu()
+        self.master.trocar_para_menu(self.vendedor)
 
     def hook_imprimir(self):
         # imprimir(self=self)
