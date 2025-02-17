@@ -9,10 +9,11 @@ import locale
 from widgets.widgets_produtos import create_widgets_produto
 
 class TelaProduto(tk.Frame):
-    def __init__(self, master, vendedor):
+    def __init__(self, master, vendedor, role):
         super().__init__(master)
         self.master = master
         self.vendedor = vendedor
+        self.role = role
         self.master.title('Tela de Produtos')
         self.create_widgets()    
     
@@ -88,7 +89,7 @@ class TelaProduto(tk.Frame):
             self.limpar()
 
     def menu(self):
-        self.master.trocar_para_menu(self.vendedor)
+        self.master.trocar_para_menu(self.vendedor, self.role)
 
     def limitar_tamanho(self, p, limite):
         return len(p) <= int(limite)

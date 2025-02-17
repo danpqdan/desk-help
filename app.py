@@ -4,6 +4,7 @@ from telas.TelaCliente import TelaCliente
 from telas.TelaProdutos import TelaProduto
 from telas.TelaMenu import TelaMenu
 from telas.TelaLogin import TelaLogin
+from telas.TelaFaturamento import TelaFaturamento
 from services.conexao import Database
 from widgets.widgets_menu import create_widgets_menu
 
@@ -30,11 +31,13 @@ class App(tk.Tk):
             elif frame_name == "menu":
                 frame = TelaMenu(self, vendedor)
             elif frame_name == "Tela de Clientes":
-                frame = TelaCliente(self, vendedor)
+                frame = TelaCliente(self, vendedor, role)
             elif frame_name == "Tela de Vendas":
-                frame = TelaVenda(self, vendedor)
+                frame = TelaVenda(self, vendedor, role)
             elif frame_name == "Tela de Produtos":
-                frame = TelaProduto(self, vendedor)
+                frame = TelaProduto(self, vendedor, role)
+            elif frame_name == "Tela de Faturamento":
+                frame = TelaFaturamento(self, vendedor, role)
             else:
                 raise ValueError(f"Frame '{frame_name}' não encontrado.")
         
@@ -52,14 +55,17 @@ class App(tk.Tk):
             del self.frames["menu"]
         self.exibir_frame("login")
         
-    def trocar_para_cliente(self, vendedor):
-        self.exibir_frame('Tela de Clientes', vendedor)
+    def trocar_para_cliente(self, vendedor, role):
+        self.exibir_frame('Tela de Clientes', vendedor, role)
         
-    def trocar_para_produto(self, vendedor):
-        self.exibir_frame('Tela de Produtos', vendedor)
+    def trocar_para_produto(self, vendedor, role):
+        self.exibir_frame('Tela de Produtos', vendedor, role)
         
-    def trocar_para_vendas(self, vendedor):
-        self.exibir_frame('Tela de Vendas', vendedor)
+    def trocar_para_vendas(self, vendedor, role):
+        self.exibir_frame('Tela de Vendas', vendedor, role)
+        
+    def trocar_para_faturamento(self, vendedor, role):
+        self.exibir_frame('Tela de Faturamento', vendedor, role)
         
 
 
