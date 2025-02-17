@@ -42,7 +42,7 @@ class Database:
             clientes = pd.read_excel('assets/Planilha Modelo de Ordem de Serviço.xlsx', sheet_name='Clientes', header=1)
             produtos = pd.read_excel('assets/Planilha Modelo de Ordem de Serviço.xlsx', sheet_name='Produtos e Serviços', header=1)
             
-            vendedor_existente = session.query(Vendedor).first()
+            vendedor_existente = session.query(Vendedor).count()
             cliente_existente = session.query(Cliente).first()
             produto_existente = session.query(ProdutoServico).first()
             
@@ -62,7 +62,7 @@ class Database:
 
                 session.commit()
 
-            elif not cliente_existente:
+            if not cliente_existente:
                 for _, linha in clientes.iterrows():
                     novo_cliente = Cliente(
                         cpf=linha['CPF'],
@@ -75,16 +75,31 @@ class Database:
 
                 session.commit()
 
-            elif not vendedor_existente:
-                novo_vendedor = Vendedor(
+            if vendedor_existente < 3:
+                admin = Vendedor(
                     email="teste@teste.com",
                     nome="admin",
                     senha="admin",
                     usuario="admin",
                     role='admin'
                 )
-                novo_vendedor.__repr__()
-                session.add(novo_vendedor)
+                gerente = Vendedor(
+                    email="teste2@teste.com",
+                    nome="Daniel S",
+                    senha="gerente",
+                    usuario="gerente",
+                    role='gerente'
+                )
+                vendedor = Vendedor(
+                    email="teste1@teste.com",
+                    nome="Daniel S",
+                    senha="vendedor",
+                    usuario="vendedor",
+                    role='vendedor'
+                )
+                session.add(admin)
+                session.add(gerente)
+                session.add(vendedor)
                 session.commit()
 
             print("Migração realizada com sucesso!")
