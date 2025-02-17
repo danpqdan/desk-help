@@ -8,10 +8,11 @@ from services.conexao import Database
 from widgets.widgets_cliente import create_widgets_cliente
 
 class TelaCliente(tk.Frame):
-    def __init__(self, master, vendedor):
+    def __init__(self, master, vendedor, role):
         super().__init__(master)
         self.master = master
         self.vendedor = vendedor
+        self.role = role
         self.create_widgets()
 
     def create_widgets(self):
@@ -88,7 +89,7 @@ class TelaCliente(tk.Frame):
             self.limpar()
 
     def menu(self): 
-        self.master.trocar_para_menu(self.vendedor)
+        self.master.trocar_para_menu(self.vendedor, self.role)
 
     def atualizar_filds(self, fields, valores):
         if len(valores) == len(fields):

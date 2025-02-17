@@ -80,7 +80,8 @@ class Database:
                     email="teste@teste.com",
                     nome="admin",
                     senha="admin",
-                    usuario="admin"
+                    usuario="admin",
+                    role='admin'
                 )
                 gerente = Vendedor(
                     email="teste2@teste.com",
