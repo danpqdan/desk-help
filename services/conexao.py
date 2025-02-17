@@ -80,7 +80,8 @@ class Database:
                     email="teste@teste.com",
                     nome="admin",
                     senha="admin",
-                    usuario="admin"
+                    usuario="admin",
+                    role='admin'
                 )
                 novo_vendedor.__repr__()
                 session.add(novo_vendedor)

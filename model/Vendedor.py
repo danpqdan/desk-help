@@ -1,6 +1,12 @@
 import bcrypt
-from sqlalchemy import Column, String
+from sqlalchemy import Column, Enum, String
+from enum import Enum as PyEnum
 from services.base import Base
+
+class Role(PyEnum):
+    ADMIN = "admin"
+    GERENTE = "gerente"
+    VENDEDOR = "vendedor"
 
 class Vendedor(Base):
     __tablename__ = 'vendedores'
@@ -9,12 +15,14 @@ class Vendedor(Base):
     nome = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False, unique=True)
     senha = Column(String(255), nullable=False)
+    role = Column(Enum(Role), nullable=False, default=Role.VENDEDOR)
 
-    def __init__(self, usuario, nome, email, senha):
+    def __init__(self, usuario, nome, email, senha, role=Role.VENDEDOR):
         self.usuario = usuario
         self.nome = nome
         self.email = email
         self.senha = self.hash_senha(senha)
+        self.role = role
     
     @staticmethod
     def hash_senha(senha: str) -> str:

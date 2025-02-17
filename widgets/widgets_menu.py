@@ -23,6 +23,12 @@ def create_widgets_menu(self):
     menu_func.add_command(label="Vendas", command=self.mostrar_vendas)
     menu_func.add_separator()
     menu_func.add_command(label="Sair", command=self.sair_app)
+    
+    # Gerencia Funcionalidades
+    menu_gerencia = tk.Menu(self.menu_bar, tearoff=0)
+    self.menu_bar.add_cascade(label="Controle", menu=menu_gerencia)
+    menu_gerencia.add_command(label="Estoque", command=self.mostrar_cliente)
+    menu_gerencia.add_command(label="Faturamento", command=self.mostrar_produto)
 
     # Menu Ajuda
     menu_ajuda = tk.Menu(self.menu_bar, tearoff=0)

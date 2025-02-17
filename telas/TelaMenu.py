@@ -6,10 +6,11 @@ from telas.TelaVenda import TelaVenda
 from widgets.widgets_menu import create_widgets_menu
 
 class TelaMenu(tk.Frame):
-    def __init__(self, master, vendedor):
+    def __init__(self, master, vendedor, role):
         super().__init__(master)
         self.master = master
         self.vendedor = vendedor
+        self.role = role
         self.config(bg="#D8EAF7")
         self.master.title("Menu Principal")
         # self.geometry(f'{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0')

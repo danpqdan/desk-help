@@ -27,17 +27,18 @@ class TelaLogin(tk.Frame):
             if not con:
                 raise ConnectionError("Não foi possível conectar ao banco de dados.")
             
-            sql_txt = f"SELECT usuario, senha FROM vendedores WHERE usuario = :usuario"
+            sql_txt = f"SELECT usuario, senha, role FROM vendedores WHERE usuario = :usuario"
             params = {"usuario": var_usuario}
             rs = db.encontrar_um(sql_query=sql_txt, params=params) 
             if rs:
-                db_usuario, db_senha_hash = rs
+                db_usuario, db_senha_hash, role = rs
                 if Vendedor.verificar_senha(senha=var_senha, senha_hash=db_senha_hash):
                     lblresult = tk.Label(self.form, text="**** Acesso Permitido ***", foreground='blue', bg='#D8EAF7')
                     lblresult.place(relx=0.2, y=150)
                     self.usuario_logado = var_usuario
+                    self.usuario_role = role
                     self.txtusuario.focus_set()
-                    self.master.trocar_para_menu(self.usuario_logado)
+                    self.master.trocar_para_menu(self.usuario_logado, self.usuario_role)
                     self.txtusuario.delete(0, 'end')
                     self.txtsenha.delete(0, 'end')
                 else:

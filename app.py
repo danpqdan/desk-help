@@ -19,7 +19,7 @@ class App(tk.Tk):
     def configurar_tela(self):
         self.config(bg="#D8EAF7")
 
-    def exibir_frame(self, frame_name, vendedor=None):
+    def exibir_frame(self, frame_name, vendedor=None, role=None):
         for frame in self.frames.values():
             frame.place_forget()
             frame.pack_forget()
@@ -28,7 +28,7 @@ class App(tk.Tk):
             if frame_name == "login":
                 frame = TelaLogin(self)
             elif frame_name == "menu":
-                frame = TelaMenu(self, vendedor)
+                frame = TelaMenu(self, vendedor, role)
             elif frame_name == "Tela de Clientes":
                 frame = TelaCliente(self, vendedor)
             elif frame_name == "Tela de Vendas":
@@ -43,8 +43,8 @@ class App(tk.Tk):
         else:
             self.frames[frame_name].pack(expand=True, fill=tk.BOTH)
 
-    def trocar_para_menu(self, vendedor):
-        self.exibir_frame("menu", vendedor)
+    def trocar_para_menu(self, vendedor, role):
+        self.exibir_frame("menu", vendedor, role)
 
     def trocar_para_login(self):
         if "menu" in self.frames:
