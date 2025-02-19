@@ -129,7 +129,7 @@ class Database:
         try:
             with self.get_conexao() as session:
                 print(f"Executando consulta: {sql_query} com params: {params}")  # Adicionando log
-                resultado = session.execute(sql_query, params).fetchall()
+                resultado = session.execute(text(sql_query), params).fetchall()
                 print(f"Resultado da consulta: {resultado}")  # Log do resultado
                 return resultado
         except Exception as e:

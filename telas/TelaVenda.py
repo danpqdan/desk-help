@@ -92,8 +92,8 @@ class TelaVenda(tk.Frame):
         self.txtsacolaid.config(state="normal")
 
         # Buscar sacolas onde vendedor ou cliente estão nulos
-        encontrar_nulo = text('''SELECT id, vendedor_usuario, cliente_cpf FROM sacolas 
-                                WHERE vendedor_usuario IS NULL OR cliente_cpf IS NULL;''')
+        encontrar_nulo = '''SELECT id, vendedor_usuario, cliente_cpf FROM sacolas 
+                                WHERE vendedor_usuario IS NULL OR cliente_cpf IS NULL;'''
         dados_nulo = con.encontrar_varios(encontrar_nulo)
 
         if dados_nulo:
@@ -148,7 +148,7 @@ class TelaVenda(tk.Frame):
                 self.txtvendedor.config(state="disabled")
 
 
-                sql_insert = text("INSERT INTO sacolas (id, vendedor_usuario) VALUES (:id, :vendedor)")
+                sql_insert = "INSERT INTO sacolas (id, vendedor_usuario) VALUES (:id, :vendedor)"
                 resultado = con.executar(sql_insert, {"id": num_venda, "vendedor": vendedor})
 
                 if resultado:
@@ -230,8 +230,8 @@ class TelaVenda(tk.Frame):
             
             if rs:
                 var_lin_venda = rs[0]                
-                sql_text = text('''INSERT INTO sacola_produto (sacola_id, lin_venda, produto_id, quantidade, valor_unit, total) 
-                                VALUES (:sacola_id, :lin_venda, :produto_id, :quantidade, :valor_unit, :total)''')
+                sql_text = '''INSERT INTO sacola_produto (sacola_id, lin_venda, produto_id, quantidade, valor_unit, total) 
+                                VALUES (:sacola_id, :lin_venda, :produto_id, :quantidade, :valor_unit, :total)'''
                 
                 params = {
                     "sacola_id": num_venda,
@@ -265,7 +265,7 @@ class TelaVenda(tk.Frame):
         
         try:
             lin_venda = item['values'][0]
-            sql_text = text('''DELETE FROM sacola_produto WHERE sacola_id = :sacola_id AND lin_venda = :lin_venda''')
+            sql_text = '''DELETE FROM sacola_produto WHERE sacola_id = :sacola_id AND lin_venda = :lin_venda'''
             params = {
                 'sacola_id': txtsacolaid,
                 'lin_venda': lin_venda
@@ -285,7 +285,7 @@ class TelaVenda(tk.Frame):
         con = Database()
         num_venda = self.txtsacolaid.get()
         try:
-            sql_delete_produtos = text("DELETE FROM sacola_produto WHERE sacola_id = :sacola_id")
+            sql_delete_produtos = "DELETE FROM sacola_produto WHERE sacola_id = :sacola_id"
             con.executar(sql_delete_produtos, {'sacola_id': num_venda})
             print(f"Sacola {num_venda} e seus produtos foram excluídos com sucesso!")
         except Exception as e:
@@ -332,7 +332,7 @@ class TelaVenda(tk.Frame):
         rs = con.encontrar_um(sql_venda_check)
         if self.validar_cab():
             if rs:
-                sql_text = text(f"UPDATE sacolas SET cliente_cpf = {var_codcli}, vendedor_usuario = '{self.vendedor}' WHERE id = {num_venda};")
+                sql_text = f"UPDATE sacolas SET cliente_cpf = {var_codcli}, vendedor_usuario = '{self.vendedor}' WHERE id = {num_venda};"
                 con.executar(sql_text)
                 messagebox.showwarning("Sucesso", f"{self.vendedor}, dados atualizado com sucesso", parent=self.master)
                 var_continuar = messagebox.askyesno("Continuar", "Deseja incluir nova Venda?", parent=self.master)
@@ -346,7 +346,7 @@ class TelaVenda(tk.Frame):
                         num_venda = rs_max_num[0][0] + 1
                     else:
                         num_venda = 1
-                    sql_text = text(f"INSERT INTO sacolas (id, cliente_cpf, vendedor_usuario) VALUES ({num_venda}, {var_codcli}, {self.vendedor});")
+                    sql_text = f"INSERT INTO sacolas (id, cliente_cpf, vendedor_usuario) VALUES ({num_venda}, {var_codcli}, {self.vendedor});"
                     print(sql_text)
                     con.executar(sql_text)
                     var_del = messagebox.askyesno("Imprimir", "Deseja Imprimir a Venda?", parent=self.master)

@@ -63,11 +63,11 @@ class VendaSacolaTreeview:
         con = Database()
         num_venda = self.tela_venda.txtsacolaid.get()
         print("Num_venda", num_venda)
-        sql_txt = text('''SELECT A.lin_venda, A.produto_id, B.descricao, A.quantidade, A.valor_unit, A.total
+        sql_txt = '''SELECT A.lin_venda, A.produto_id, B.descricao, A.quantidade, A.valor_unit, A.total
                  FROM sacola_produto A
                  JOIN produtos_servicos B ON A.produto_id = B.codigo
                  WHERE A.sacola_id = :sacola_id
-                 ORDER BY A.sacola_id, A.lin_venda''')
+                 ORDER BY A.sacola_id, A.lin_venda'''
         rs = con.encontrar_varios(sql_txt, {'sacola_id': num_venda})
         if rs is None:
             messagebox.showerror("Erro", "Não foi possível consultar as vendas.")

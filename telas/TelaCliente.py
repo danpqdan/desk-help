@@ -29,7 +29,7 @@ class TelaCliente(tk.Frame):
         self.txtcpf.delete(0, "end")
 
         con = Database()
-        sql_txt = text(f"select cpf, nome, telefone, email from clientes where cpf = :cpf")
+        sql_txt = f"select cpf, nome, telefone, email from clientes where cpf = :cpf"
         params = var_cpf
         rs = con.encontrar_um(sql_txt, params=params)
         if rs:
@@ -49,14 +49,14 @@ class TelaCliente(tk.Frame):
         var_email = self.txtemail.get()
 
         con = Database()
-        sql_txt = text("SELECT cpf, nome, telefone, email FROM clientes WHERE cpf = :cpf")
+        sql_txt = "SELECT cpf, nome, telefone, email FROM clientes WHERE cpf = :cpf"
         params = {"cpf": var_cpf}
         rs = con.encontrar_um(sql_txt, params)
 
         if rs:
-            sql_text = text("UPDATE clientes SET nome = :nome, telefone = :telefone, email = :email WHERE cpf = :cpf")
+            sql_text = "UPDATE clientes SET nome = :nome, telefone = :telefone, email = :email WHERE cpf = :cpf"
         else:
-            sql_text = text("INSERT INTO clientes (cpf, nome, telefone, email) VALUES (:cpf, :nome, :telefone, :email)")
+            sql_text = "INSERT INTO clientes (cpf, nome, telefone, email) VALUES (:cpf, :nome, :telefone, :email)"
         params = {
             "cpf": var_cpf,
             "nome": var_nome,
@@ -76,7 +76,7 @@ class TelaCliente(tk.Frame):
             var_cpf = self.txtcpf.get()
 
             con = Database()
-            sql_text = text(f"delete from clientes where cpf = :cpf")
+            sql_text = f"delete from clientes where cpf = :cpf"
             params = var_cpf
             if con.executar(sql_text, params):
                 messagebox.showinfo("Aviso", "Item Excluido com Sucesso", parent=self.master)
