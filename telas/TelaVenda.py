@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
+from datetime import datetime
 
 from sqlalchemy import func, or_, text
 from model.Cliente import Cliente
@@ -131,7 +132,7 @@ class TelaVenda(tk.Frame):
         rs = self.con.query(func.coalesce(func.max(Sacola.id),0)).scalar()
         
         if rs:
-            num_venda = rs[0]
+            num_venda = rs
             if num_venda == 0:
                 num_venda = 1
             else:
@@ -148,7 +149,7 @@ class TelaVenda(tk.Frame):
                 self.txtvendedor.config(state="disabled")
 
 
-                sacola = Sacola()
+                sacola = Sacola(cliente_id=None, vendedor_id=self.vendedor)
                 self.con.add(sacola)
                 self.con.commit()
         
@@ -316,6 +317,7 @@ class TelaVenda(tk.Frame):
             if venda_db:
                 venda_db.cliente_cpf = clicpf
                 venda_db.vendedor_usuario = self.vendedor
+                venda_db.time_stamp = datetime.now()
                 self.con.commit()
                 self.baixa_estoque()
 
