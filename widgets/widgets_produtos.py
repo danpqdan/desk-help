@@ -44,7 +44,7 @@ def create_widgets_produto(self):
     self.txtdescricao.place(relx=0.22, rely=0.14, width=400)
     
     self.custo_var = tk.StringVar()
-    self.custo_var.trace_add('write', self.calcular)
+    self.custo_var.trace_add('write', lambda name, index, mode: formatar_campo(self.custo_var, "float"))
     lblcusto = tk.Label(self.form, text="Custo:", bg="#D8EAF7", fg="black", font=('Calibri', 12), anchor='w')
     lblcusto.place(relx=0.05, rely=0.20, width=90)
     self.txtcusto = tk.Entry(self.form, font=('Calibri', 12), textvariable=self.custo_var)
@@ -52,7 +52,7 @@ def create_widgets_produto(self):
     self.txtcusto.bind("<KeyRelease>", lambda event: self.calcular())
 
     self.porcentagem_var = tk.StringVar()
-    self.porcentagem_var.trace_add('write', self.calcular)
+    self.porcentagem_var.trace_add('write', lambda name, index, mode: formatar_campo(self.porcentagem_var, "float"))
     lblporcentagem = tk.Label(self.form, text="Porcentagem:", bg="#D8EAF7", fg="black", font=('Calibri', 12), anchor='w')
     lblporcentagem.place(relx=0.39, rely=0.20, width=90)
     self.txtporcentagem = tk.Entry(self.form, font=('Calibri', 12), textvariable=self.porcentagem_var)
@@ -60,7 +60,7 @@ def create_widgets_produto(self):
     self.txtporcentagem.bind("<KeyRelease>", lambda event: self.calcular())
 
     self.valor_var = tk.StringVar()
-    self.valor_var.trace_add('write', self.calcular)
+    self.valor_var.trace_add('write', lambda name, index, mode: formatar_campo(self.valor_var, "float"))
     lblvalor = tk.Label(self.form, text="Preço:", bg="#D8EAF7", fg="black", font=('Calibri', 12), anchor='w')
     lblvalor.place(relx=0.05, rely=0.26, width=90)
     self.txtvalor = tk.Entry(self.form, font=('Calibri', 12), textvariable=self.valor_var)
@@ -84,14 +84,28 @@ def create_widgets_produto(self):
     btnmenu = tk.Button(self.form, text="Menu", bg='#D8EAF7', foreground='black', font=('Calibri', 12), command=self.menu)
     btnmenu.place(relx=0.70, rely=0.4, width=65)
 
-
-    self.text_fields = [self.txtcodigo, self.txtdescricao, self.cmbtipo, self.txtcusto, self.txtporcentagem, self.txtvalor, self.txtquantidade]
-    self.tree = ProdutoTreeview(self)
-    self.tree.tree.bind("<Double-1>", lambda event: self.atualizar_filds(self.text_fields, self.tree.duplo_click(event)))
-
     self.txtcodigo.focus_set()
 
 def validar_e_converter(self,texto):
     """Converte o texto para maiúsculas e aplica limite de caracteres."""
     self.set(texto.upper())
     return True
+
+
+def formatar_campo(var, tipo=None):
+    """ Formata o valor do campo para números float ou inteiros corretamente. """
+    valor = var.get()
+    if not valor:
+        return
+    if tipo == "float":
+        valor = valor.strip().replace(',', '.')
+        try:
+            valor = float(valor)
+            var.set(f"{valor:.2f}")
+        except ValueError:
+            var.set("")
+    elif tipo == "int":
+        if valor.isdigit():
+            var.strip().set(int(valor))
+        else:
+            var.set("")

@@ -29,7 +29,6 @@ class ProdutoTreeview:
             show='headings',
             style="mystyle.Treeview"
         )
-
         self.tree.heading("#1", text="codigo", command=lambda: self.ordenar_coluna("#1", False))
         self.tree.column("#1", width=20, anchor='c')
 
@@ -39,13 +38,13 @@ class ProdutoTreeview:
         self.tree.heading("#3", text="tipo", command=lambda:self.ordenar_coluna("#3", False))
         self.tree.column("#3", width=80, anchor='c')
         
-        self.tree.heading("#4", text="custo", command=lambda: self.ordenar_coluna("#4", False))
+        self.tree.heading("#4", text="valor", command=lambda: self.ordenar_coluna("#4", False))
         self.tree.column("#4", width=100, anchor='center')
         
-        self.tree.heading("#5", text="porcentagem", command=lambda: self.ordenar_coluna("#5", False))
+        self.tree.heading("#5", text="custo", command=lambda: self.ordenar_coluna("#5", False))
         self.tree.column("#5", width=100, anchor='center')
 
-        self.tree.heading("#6", text="valor", command=lambda: self.ordenar_coluna("#6", False))
+        self.tree.heading("#6", text="porcentagem", command=lambda: self.ordenar_coluna("#6", False))
         self.tree.column("#6", width=100, anchor='center')
         
         self.tree.heading("#7", text="Quantidade", command=lambda: self.ordenar_coluna("#7", False))

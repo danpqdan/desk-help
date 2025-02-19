@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import messagebox
 
 from sqlalchemy import text
+from services.ProdutoTreeview import ProdutoTreeview
 from services.conexao import Database
 import locale
 from widgets.widgets_produtos import create_widgets_produto
@@ -19,13 +20,18 @@ class TelaProduto(tk.Frame):
     
     def create_widgets(self):
         create_widgets_produto(self=self)
+        self.text_fields = [self.txtcodigo, self.txtdescricao, self.cmbtipo, self.txtvalor, self.txtcusto, self.txtporcentagem, self.txtquantidade]
+        self.tree = ProdutoTreeview(self)
+        self.tree.tree.bind("<Double-1>", lambda event: self.atualizar_filds(self.text_fields, self.tree.duplo_click(event)))
+    
         
         
     def calcular(self, *args):
         try:
-            custo = float(self.custo_var.get()) if self.custo_var.get() else None
-            porcentagem = float(self.porcentagem_var.get()) if self.porcentagem_var.get() else None
-            valor_final = float(self.valor_var.get()) if self.valor_var.get() else None
+            custo = float(self.custo_var.get()) if self.custo_var.get().replace('.', '', 1).isdigit() else None
+            porcentagem = float(self.porcentagem_var.get()) if self.porcentagem_var.get().replace('.', '', 1).isdigit() else None
+            valor_final = float(self.valor_var.get()) if self.valor_var.get().replace('.', '', 1).isdigit() else None
+
 
             if custo is not None:
                 if porcentagem is not None and (valor_final is None or valor_final == custo + (custo * porcentagem / 100)):
@@ -47,16 +53,19 @@ class TelaProduto(tk.Frame):
         self.cmbtipo.delete(0, "end")
         self.txtdescricao.delete(0, "end")
         self.txtvalor.delete(0, "end")
+        self.txtcusto.delete(0,"end")
+        self.txtquantidade.delete(0,"end")
+        self.txtporcentagem.delete(0,"end")
         self.txtcodigo.focus_set()
 
     def buscar(self):
         var_codigo = self.txtcodigo.get()
         con = Database()
-        sql_txt = f"select codigo, descricao, tipo, custo, porcentagem, valor, quantidade from produtos_servicos where codigo = {var_codigo}"
-        rs = con.encontrar_um(sql_query=sql_txt)
+        sql_txt = f"select codigo, descricao, tipo, valor, custo, porcentagem, quantidade from produtos_servicos where codigo = :codigo"
+        rs = con.encontrar_um(sql_query=sql_txt, params={"codigo": var_codigo})
 
         if rs:
-            codigo, descricao, tipo, custo, porcentagem, valor, quantidade = rs
+            codigo, descricao, tipo, valor, custo, porcentagem, quantidade = rs
             self.limpar()
             self.txtcodigo.insert(0, codigo)
             self.cmbtipo.insert(0, tipo)
@@ -72,20 +81,20 @@ class TelaProduto(tk.Frame):
 
     def gravar(self):
         var_codigo = self.txtcodigo.get()
-        var_tipo = self.cmbtipo.get()
-        var_descricao = str.upper(self.txtdescricao.get())
-        var_valor = self.txtvalor.get()
-        var_valor = float(var_valor.replace('R$', '').strip().replace('.', '').replace(',', '.'))
-        var_custo = self.txtcusto.get()
-        var_porcentagem = self.txtporcentagem.get()
+        var_tipo = self.cmbtipo.get().strip()
+        var_descricao = self.txtdescricao.get().upper()
+        var_valor = self.valor_var.get()
+        var_custo = self.custo_var.get()
+        var_porcentagem = self.porcentagem_var.get()
         var_quantidade = self.txtquantidade.get()
 
         con = Database()
-        sql_txt = f"select from produtos_servicos where codigo = {var_codigo}"
-        rs = con.encontrar_um(sql_txt)
+        sql_txt = f"select * from produtos_servicos where codigo = :codigo"
+
+        rs = con.encontrar_um(sql_txt, params={"codigo": str(var_codigo)})
 
         if rs:
-            sql_text = "UPDATE produtos_servicos SET custo=:custo, porcentagem=:porcentagem, quantidade=:quantidade tipo=:tipo, descricao=:descricao, valor=:valor WHERE codigo = :codigo"
+            sql_text = "UPDATE produtos_servicos SET custo=:custo, porcentagem=:porcentagem, quantidade=:quantidade, tipo=:tipo, descricao=:descricao, valor=:valor WHERE codigo = :codigo"
         else:
             sql_text = "INSERT INTO produtos_servicos (codigo, tipo, descricao, valor, custo, quantidade, porcentagem) VALUES (:codigo, :tipo, :descricao, :valor, :custo, :quantidade, :porcentagem)"
         
