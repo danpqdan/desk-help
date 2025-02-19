@@ -3,13 +3,15 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 
-from sqlalchemy import text
+from sqlalchemy import func, or_, text
+from model.Cliente import Cliente
+from model.ProdutoServico import ProdutoServico
+from model.Sacola import Sacola, SacolaProduto
 from services.imprimir import PedidoVenda
 from services.VendaTreeview import VendaSacolaTreeview
 from services.ClienteTreeview import ClienteTreeview
 from services.ProdutoTreeview import ProdutoTreeview
 from services.conexao import Database
-# from services.func_imprimir_vendas import imprimir
 from widgets.widgets_venda import create_widgets_vendas
 
 
@@ -20,6 +22,7 @@ class TelaVenda(tk.Frame):
         self.vendedor = vendedor
         self.role = role
         self.config(bg="#D8EAF7")
+        self.con = Database().SessionLocal()
         self.create_widgets()        
         self.numeracao()
         self.tree.visualizar()
@@ -29,6 +32,8 @@ class TelaVenda(tk.Frame):
 
     def create_widgets(self):
         create_widgets_vendas(self=self)
+        self.tree = VendaSacolaTreeview(self)
+
         
     # def abrir_popup_busca_vendas(self):
     #     popup_busca = tk.Toplevel(self.master)
@@ -88,35 +93,32 @@ class TelaVenda(tk.Frame):
         tree.tree.bind("<Double-1>", handle_duplo_click)
 
     def numeracao(self):
-        con = Database()
         self.txtsacolaid.config(state="normal")
 
-        # Buscar sacolas onde vendedor ou cliente estão nulos
-        encontrar_nulo = '''SELECT id, vendedor_usuario, cliente_cpf FROM sacolas 
-                                WHERE vendedor_usuario IS NULL OR cliente_cpf IS NULL;'''
-        dados_nulo = con.encontrar_varios(encontrar_nulo)
-
-        if dados_nulo:
-            print(f"Sacola encontrada com valores nulos: {dados_nulo}")
-            sacola_id, vendedor, cliente = tuple(dados_nulo[0])  # Pega o primeiro registro válido
-            
-            # Atualizar txtsacolaid
+        sacola_vazia = self.con.query(Sacola).filter(
+            or_(Sacola.vendedor_usuario.is_(None), Sacola.cliente_cpf.is_(None))
+        ).first()
+        
+        if sacola_vazia:
+            print(f"Sacola encontrada com valores nulos: {sacola_vazia.__repr__}")
+                        
             self.txtsacolaid.delete(0, "end")
-            self.txtsacolaid.insert(0, sacola_id)
+            self.txtsacolaid.insert(0, sacola_vazia.id)
+            self.txtsacolaid.config(state="disabled")
             
             # Atualizar vendedor se existir
-            if vendedor:
+            if sacola_vazia.vendedor_usuario:
                 self.txtvendedor.delete(0, "end")
-                self.txtvendedor.insert(0, vendedor)
+                self.txtvendedor.insert(0, sacola_vazia.vendedor_usuario)
                 self.txtvendedor.config(state="disabled")
             else:
                 self.txtvendedor.delete(0, "end")
                 self.txtvendedor.insert(0, self.vendedor)
                 self.txtvendedor.config(state="disabled")            
             # Atualizar cliente se existir
-            if cliente:
+            if sacola_vazia.cliente_cpf:
                 self.txtclicpf.delete(0, "end")
-                self.txtclicpf.insert(0, cliente)
+                self.txtclicpf.insert(0, sacola_vazia.cliente_cpf)
                 self.bus_cli()
                 self.txtclicpf.config(state="disabled")
         else:
@@ -125,10 +127,8 @@ class TelaVenda(tk.Frame):
 
             
     def nova_sacola(self):
-        con = Database()
         vendedor = self.vendedor        
-        sql_txt = "SELECT COALESCE(MAX(id), 0) AS id FROM sacolas"
-        rs = con.encontrar_um(sql_txt)
+        rs = self.con.query(func.coalesce(func.max(Sacola.id),0)).scalar()
         
         if rs:
             num_venda = rs[0]
@@ -148,18 +148,18 @@ class TelaVenda(tk.Frame):
                 self.txtvendedor.config(state="disabled")
 
 
-                sql_insert = "INSERT INTO sacolas (id, vendedor_usuario) VALUES (:id, :vendedor)"
-                resultado = con.executar(sql_insert, {"id": num_venda, "vendedor": vendedor})
-
-                if resultado:
-                    print(f"Nova sacola criada com num_venda: {num_venda}")
+                sacola = Sacola()
+                self.con.add(sacola)
+                self.con.commit()
+        
+                if sacola.id:
+                    print(f"Nova sacola criada com num_venda: {sacola.id}")
                 else:
                     print("Erro ao inserir a nova sacola no banco.")
 
                 self.tree.limpar_arv()
                 self.txtsacolaid.delete(0, "end")
-                self.txtsacolaid.insert(0, num_venda)
-                print(f"Campo txtsacolaid atualizado para: {num_venda}")
+                self.txtsacolaid.insert(0, sacola.id)
 
             except Exception as e:
                 messagebox.showerror("Erro", f"Erro ao criar nova sacola: {e}")
@@ -198,7 +198,6 @@ class TelaVenda(tk.Frame):
             return True
 
     def gravar_lin(self):
-        con = Database()
         num_venda = self.txtsacolaid.get()
         var_clicpf = self.txtclicpf.get()
         var_codprod = self.txtcodprod.get()
@@ -225,30 +224,21 @@ class TelaVenda(tk.Frame):
             return
         
         try:
-            sql_txt = "SELECT COALESCE(MAX(lin_venda), 0) + 1 AS lin_venda FROM sacola_produto WHERE sacola_id = :sacola_id"
-            rs = con.encontrar_um(sql_txt, params={"sacola_id": num_venda})
-            
-            if rs:
-                var_lin_venda = rs[0]                
-                sql_text = '''INSERT INTO sacola_produto (sacola_id, lin_venda, produto_id, quantidade, valor_unit, total) 
-                                VALUES (:sacola_id, :lin_venda, :produto_id, :quantidade, :valor_unit, :total)'''
-                
-                params = {
-                    "sacola_id": num_venda,
-                    "lin_venda": var_lin_venda,
-                    "produto_id": var_codprod,
-                    "quantidade": var_qtde,
-                    "valor_unit": var_vlrunit,
-                    "total": var_valor
-                }
-
-                if con.executar(sql_text, params=params):
+            sacola_produto = SacolaProduto(
+                sacola_id=num_venda,
+                produto_id=var_codprod,
+                quantidade=var_qtde,
+                valor_unit=var_vlrunit,
+                total=var_valor,
+                session=self.con
+            )
+            self.con.add(sacola_produto)
+            self.con.commit()
+            if sacola_produto.lin_venda:
                     messagebox.showinfo("Sucesso", "Linha gravada com sucesso!", parent=self.master)
                     self.limpar()
-                else:
-                    messagebox.showerror("Erro", "Falha ao gravar a linha.", parent=self.master)
             else:
-                messagebox.showerror("Erro", "Erro ao recuperar o próximo número de linha.", parent=self.master)
+                messagebox.showerror("Erro", "Falha ao gravar a linha.", parent=self.master)
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao gravar linha: {e}", parent=self.master)
 
@@ -258,50 +248,43 @@ class TelaVenda(tk.Frame):
         self.total()
 
     def excluir(self):
-        con = Database()
         txtsacolaid = self.txtsacolaid.get()
         item = self.tree.limpar_lin()
-        print("Item retornado:", item)
+        lin_venda = item['values'][0]
+
+        lin_deletada = self.con.query(SacolaProduto).filter(
+            SacolaProduto.sacola_id == txtsacolaid,
+            SacolaProduto.lin_venda == lin_venda
+        ).delete(synchronize_session=False)
         
-        try:
-            lin_venda = item['values'][0]
-            sql_text = '''DELETE FROM sacola_produto WHERE sacola_id = :sacola_id AND lin_venda = :lin_venda'''
-            params = {
-                'sacola_id': txtsacolaid,
-                'lin_venda': lin_venda
-            }
-
-            if con.executar(sql_text, params):
-                self.tree.visualizar()
-                self.total()
-            else:
-                messagebox.showerror("Erro", "Falha ao executar a exclusão.", parent=self.master)
-
-        except Exception as e:
-            messagebox.showwarning("Aviso", f"Erro ao excluir: {e}", parent=self.master)
-
+        self.con.commit()
+        
+        if lin_deletada:
+            self.tree.visualizar()
+            self.total()
+            print(f"{lin_deletada} registros deletados com sucesso.")
+        else:
+            print("Nenhum registro encontrado para deletar.")
 
     def excluir_inic(self):
-        con = Database()
         num_venda = self.txtsacolaid.get()
         try:
-            sql_delete_produtos = "DELETE FROM sacola_produto WHERE sacola_id = :sacola_id"
-            con.executar(sql_delete_produtos, {'sacola_id': num_venda})
+            self.con.query(SacolaProduto).filter(SacolaProduto.sacola_id == num_venda).delete(synchronize_session=False)
+            self.con.query(Sacola).filter(Sacola.id == num_venda).delete(synchronize_session=False)
+            self.con.commit()
             print(f"Sacola {num_venda} e seus produtos foram excluídos com sucesso!")
         except Exception as e:
             print(f"Erro ao excluir sacola e produtos: {e}")
 
     def total(self):
-        con = Database()
         num_venda = self.txtsacolaid.get()
-        
-        sql_txt = '''SELECT IFNULL(SUM(A.total), 0) AS valor FROM sacola_produto A WHERE A.sacola_id = :num_venda'''
-        params = {'num_venda': num_venda}
-        
-        rs = con.encontrar_um(sql_txt, params=params)
-        
-        if rs:
-            total_valor = rs[0]
+        total = (
+        self.con.query(func.coalesce(func.sum(SacolaProduto.total), 0))
+        .filter(SacolaProduto.sacola_id == num_venda)
+        .scalar()
+        )
+        if total:
+            total_valor = total
         else:
             total_valor = 0.0
 
@@ -324,87 +307,82 @@ class TelaVenda(tk.Frame):
 
             
     def gravar(self):
-        con = Database()
         num_venda = self.txtsacolaid.get()
-        var_codcli = self.txtclicpf.get()
-        var_total = float(self.txt_total.get())
-        sql_venda_check = f"select * from sacolas where id = {num_venda}"
-        rs = con.encontrar_um(sql_venda_check)
+        clicpf = self.txtclicpf.get()
+        
+        venda_db = self.con.query(Sacola).filter(Sacola.id == num_venda).first()
+
         if self.validar_cab():
-            if rs:
-                sql_text = f"UPDATE sacolas SET cliente_cpf = {var_codcli}, vendedor_usuario = '{self.vendedor}' WHERE id = {num_venda};"
-                con.executar(sql_text)
-                messagebox.showwarning("Sucesso", f"{self.vendedor}, dados atualizado com sucesso", parent=self.master)
+            if venda_db:
+                venda_db.cliente_cpf = clicpf
+                venda_db.vendedor_usuario = self.vendedor
+                self.con.commit()
+                self.baixa_estoque()
+
+                messagebox.showinfo("Sucesso", f"{self.vendedor}, dados atualizados com sucesso", parent=self.master)
+                var_del = messagebox.askyesno("Imprimir", "Deseja Imprimir a Venda?", parent=self.master)
+                if var_del:
+                    self.hook_imprimir()
                 var_continuar = messagebox.askyesno("Continuar", "Deseja incluir nova Venda?", parent=self.master)
                 if var_continuar:
                     self.nova_sacola()
-            else:                       
-                if var_total > 0:
-                    sql_get_max_num_venda = "SELECT MAX(id) FROM sacola"
-                    rs_max_num = con.encontrar_um(sql_get_max_num_venda)
-                    if rs_max_num:
-                        num_venda = rs_max_num[0][0] + 1
-                    else:
-                        num_venda = 1
-                    sql_text = f"INSERT INTO sacolas (id, cliente_cpf, vendedor_usuario) VALUES ({num_venda}, {var_codcli}, {self.vendedor});"
-                    print(sql_text)
-                    con.executar(sql_text)
-                    var_del = messagebox.askyesno("Imprimir", "Deseja Imprimir a Venda?", parent=self.master)
-                    if var_del:
-                        self.imprimir()
-                    self.limpar()
-                    self.limpar_cab()
+                else:
                     self.numeracao()
-                    self.tree.visualizar()
-                    self.total()
         else:
             messagebox.showwarning("Aviso", "Favor preencher os campos do cabeçalho", parent=self.master)
             
-            
-            
-    def bus_venda(self,cod_compra, event=None):
+    def baixa_estoque(self):
         con = Database()
-        sql_txt = "SELECT id, cliente_cpf, vendedor_usuario FROM sacola WHERE num_venda = :cod_compra"
-        venda = con.encontrar_um(sql_txt, params={"cod_compra": cod_compra})
-        if venda:
-            sql_txt = '''SELECT A.lin_venda, A.codigo, B.descricao, A.quantidade, A.valor_unit, A.total
-             FROM sacola_produto A
-             JOIN produto B ON A.codigo = B.codigo
-             WHERE A.id = :venda_id
-             ORDER BY A.id, A.lin_venda'''
-            linha_venda = con.encontrar_varios(sql_txt, params={"venda_id": venda[0]})
-            if linha_venda:
-                for linha in self.tree.get_children():
-                    self.tree.delete(linha)
-                for linha in linha_venda:
-                    self.tree.insert("", tk.END, values=linha)
+        for child in self.tree.tree.get_children():
+            codigo = str(self.tree.tree.item(child)["values"][1])
+            quantidade = str(self.tree.tree.item(child)["values"][3])
+            self.con.query(ProdutoServico).filter(ProdutoServico.codigo == codigo).update(
+                {ProdutoServico.quantidade: ProdutoServico.quantidade - quantidade}
+            )
+        self.con.commit()
+            
+            
+    # def bus_venda(self,cod_compra, event=None):
+    #     con = Database()
+    #     sql_txt = "SELECT id, cliente_cpf, vendedor_usuario FROM sacola WHERE num_venda = :cod_compra"
+    #     venda = con.encontrar_um(sql_txt, params={"cod_compra": cod_compra})
+    #     if venda:
+    #         sql_txt = '''SELECT A.lin_venda, A.codigo, B.descricao, A.quantidade, A.valor_unit, A.total
+    #          FROM sacola_produto A
+    #          JOIN produto B ON A.codigo = B.codigo
+    #          WHERE A.id = :venda_id
+    #          ORDER BY A.id, A.lin_venda'''
+    #         linha_venda = con.encontrar_varios(sql_txt, params={"venda_id": venda[0]})
+    #         if linha_venda:
+    #             for linha in self.tree.get_children():
+    #                 self.tree.delete(linha)
+    #             for linha in linha_venda:
+    #                 self.tree.insert("", tk.END, values=linha)
                     
-                # config num_venda
-                self.txtsacolaid.config(state="normal")
-                self.txtsacolaid.delete(0, "end")
-                self.txtsacolaid.insert(0, venda[0])
-                self.txtsacolaid.config(state="disabled")
-                #config txtclicpf
-                self.txtclicpf.config(state="normal")
-                self.txtclicpf.delete(0, "end")
-                self.txtclicpf.insert(0, venda[1])
-                self.txtclicpf.config(state="disabled")
-                self.bus_cli()
-                # config total_venda
-                self.txt_total.config(state="normal")
-                self.txt_total.delete(0, "end")
-                self.txt_total.insert(0, venda[2])
-                self.txt_total.config(state="disabled")
+    #             # config num_venda
+    #             self.txtsacolaid.config(state="normal")
+    #             self.txtsacolaid.delete(0, "end")
+    #             self.txtsacolaid.insert(0, venda[0])
+    #             self.txtsacolaid.config(state="disabled")
+    #             #config txtclicpf
+    #             self.txtclicpf.config(state="normal")
+    #             self.txtclicpf.delete(0, "end")
+    #             self.txtclicpf.insert(0, venda[1])
+    #             self.txtclicpf.config(state="disabled")
+    #             self.bus_cli()
+    #             # config total_venda
+    #             self.txt_total.config(state="normal")
+    #             self.txt_total.delete(0, "end")
+    #             self.txt_total.insert(0, venda[2])
+    #             self.txt_total.config(state="disabled")
             
     def bus_cli(self, event=None):
-        con = Database()
         var_codcli = self.txtclicpf.get()
-        sql_txt = f"select nome from clientes where cpf = {var_codcli}"
-        rs = con.encontrar_um(sql_txt)
-        if rs:
+        cliente = self.con.query(Cliente).filter(Cliente.cpf == var_codcli).first()
+        if cliente:
             self.txtnomecli.config(state="normal")
             self.txtnomecli.delete(0, "end")
-            self.txtnomecli.insert(0, rs[0])
+            self.txtnomecli.insert(0, cliente.nome)
             self.txtnomecli.config(state="disabled")
             self.txtcodprod.focus_set()
         else:
@@ -418,16 +396,15 @@ class TelaVenda(tk.Frame):
     def bus_prod(self, event=None):
         con = Database()
         var_codprod = self.txtcodprod.get()
-        sql_txt = f"select descricao, valor from produtos_servicos where codigo = {var_codprod}"
-        rs = con.encontrar_um(sql_txt)
-        if rs:
+        produto = self.con.query(ProdutoServico).filter(ProdutoServico.codigo == var_codprod).first()
+        if produto:
             self.txtdescricao.config(state="normal")
             self.txtdescricao.delete(0, "end")
-            self.txtdescricao.insert(0, rs[0])
+            self.txtdescricao.insert(0, produto.descricao)
             self.txtdescricao.config(state="disabled")
             self.lblvlrunit.config(state="normal")
             self.txtvlrunit.delete(0, "end")
-            self.txtvlrunit.insert(0, rs[1])
+            self.txtvlrunit.insert(0, produto.valor)
             self.txtvlrunit.config(state="disabled")
             self.txtqtde.focus_set()
         else:
@@ -454,11 +431,9 @@ class TelaVenda(tk.Frame):
     def cancelar(self):
         var_del = messagebox.askyesno("Cancelar", "Deseja Cancelar a Venda?", parent=self.master)
         if var_del:
-            con = Database()
             sacola_id = self.txtsacolaid.get()
             sql = "DELETE * FROM sacola_produto where sacola_id = :sacola_id "
-            params = sacola_id
-            con.executar(sql, params)
+            self.con.query(SacolaProduto).filter(SacolaProduto.sacola_id == sacola_id).delete()
             self.limpar()
             self.limpar_cab()
             self.numeracao()
@@ -468,6 +443,7 @@ class TelaVenda(tk.Frame):
 
     
     def menu(self):
+        self.con.close()
         self.master.trocar_para_menu(self.vendedor, self.role)
 
     def hook_imprimir(self):

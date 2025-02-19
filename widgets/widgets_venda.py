@@ -121,7 +121,5 @@ def create_widgets_vendas(self):
 
     self.btnmenu = tk.Button(self, text="Menu", bg='#00FFFF', foreground='black', font=('Calibri', 12, 'bold'), command=self.menu)
     self.btnmenu.place(relx=0.60, rely=0.55, width=100, height=50)
-    
-    self.tree = VendaSacolaTreeview(self)
 
    
