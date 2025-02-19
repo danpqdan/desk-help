@@ -61,8 +61,8 @@ class App(tk.Tk):
     def trocar_para_produto(self, vendedor, role):
         self.exibir_frame('Tela de Produtos', vendedor, role)
         
-    def trocar_para_vendas(self, vendedor):
-        self.exibir_frame('Tela de Vendas', vendedor)
+    def trocar_para_vendas(self, vendedor, role):
+        self.exibir_frame('Tela de Vendas', vendedor, role)
     
     def trocar_para_faturamento(self, vendedor, role):
         self.exibir_frame('Tela de Faturamento', vendedor, role)
