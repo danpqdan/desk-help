@@ -71,7 +71,7 @@ class ClienteTreeview:
 
     def visualizar(self):
         con=Database()
-        sql_txt = text("SELECT * FROM clientes ORDER BY nome")
+        sql_txt = "SELECT * FROM clientes ORDER BY nome"
         rs=con.encontrar_varios(sql_txt)
 
         self.tree.bind("<Double-1>", self.duplo_click)
@@ -85,7 +85,7 @@ class ClienteTreeview:
     def pesquisar_nome(self, p):
         con = Database()
         try:
-            sql_txt = text(f"select * from clientes where nome like '%{p}%'")
+            sql_txt = f"select * from clientes where nome like '%{p}%'"
             rs = con.encontrar_varios(sql_txt)
 
             for linha in self.tree.get_children():

@@ -56,9 +56,9 @@ class TelaProduto(tk.Frame):
         rs = con.encontrar_um(sql_txt)
 
         if rs:
-            sql_text = text("UPDATE produtos_servicos SET tipo=:tipo, descricao=:descricao, valor=:valor WHERE codigo = :codigo")
+            sql_text = "UPDATE produtos_servicos SET tipo=:tipo, descricao=:descricao, valor=:valor WHERE codigo = :codigo"
         else:
-            sql_text = text("INSERT INTO produtos_servicos (codigo, tipo, descricao, valor) VALUES (:codigo, :tipo, :descricao, :valor)")
+            sql_text = "INSERT INTO produtos_servicos (codigo, tipo, descricao, valor) VALUES (:codigo, :tipo, :descricao, :valor)"
         
         params = {
             "codigo": var_codigo,
