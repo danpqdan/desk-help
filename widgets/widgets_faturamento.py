@@ -72,7 +72,7 @@ def create_widgets_faturamento(self):
     self.cmbvendedor = ttk.Combobox(self.container_filtros, values=obter_vendedores, state="readonly")
     self.cmbvendedor.place(relx=0.35, rely=0.2, width=120, height=20)
     
-    self.boxtodosvendedores = ttk.Checkbutton(self.container_filtros, text="Todos os vendedores")
+    self.boxtodosvendedores = ttk.Checkbutton(self.container_filtros, text="Todos os vendedores", variable=self.todos_vendedores,onvalue=True,offvalue=False)
     self.boxtodosvendedores.place(relx=0.65, rely=0.2, width=140, height=20)
     
     lblcliente = tk.Label(self.container_filtros, text='Por cliente', font=('Calibri', 12, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
@@ -81,7 +81,7 @@ def create_widgets_faturamento(self):
     self.cliente = ttk.Combobox(self.container_filtros, values=obter_clientes, state="readonly")
     self.cliente.place(relx=0.35, rely=0.25, width=120, height=20)
     
-    self.boxtodoscliente = ttk.Checkbutton(self.container_filtros, text="Todos clientes")
+    self.boxtodoscliente = ttk.Checkbutton(self.container_filtros, text="Todos clientes", variable=self.todos_clientes,onvalue=True,offvalue=False)
     self.boxtodoscliente.place(relx=0.65, rely=0.25, width=140, height=20)
     
     
@@ -89,7 +89,7 @@ def create_widgets_faturamento(self):
     self.btnlimpar.place(relx=0.5, rely=0.45, anchor="center", width=largura_personalizada - 25)
     self.btnlimpar.lift()
 
-    self.btnfiltrar = tk.Button(self.container_filtros, text="FILTRAR", bg='#D8EAF7', border=1, relief="solid", command=self.filtrar_por_data)
+    self.btnfiltrar = tk.Button(self.container_filtros, text="FILTRAR", bg='#D8EAF7', border=1, relief="solid", command=self.filtrar_dados)
     self.btnfiltrar.place(relx=0.5, rely=0.50, anchor="center", width=largura_personalizada - 25)
 
     self.btnrelatorio = tk.Button(self.container_filtros, text="RELATORIO", bg='#D8EAF7', border=1, relief="solid")
@@ -106,7 +106,7 @@ def obter_vendedores(self):
         """Recupera os vendedores do banco de dados"""
         try:
             con = Database()
-            vendedores = con.encontrar_varios(text("SELECT usuario FROM vendedores"))
+            vendedores = con.encontrar_varios("SELECT usuario FROM vendedores")
             self.vendedores = [vendedor[0] for vendedor in vendedores]
             
             self.cmbvendedor['values'] = self.vendedores
@@ -120,7 +120,7 @@ def obter_clientes(self):
     """Recupera os clientes do banco de dados"""
     try:
         con = Database()
-        clientes = con.encontrar_varios(text("SELECT nome FROM clientes"))
+        clientes = con.encontrar_varios("SELECT nome FROM clientes")
         self.clientes = [cliente[0] for cliente in clientes]
         
         # Atualiza o Combobox de clientes
