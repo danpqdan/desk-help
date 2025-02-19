@@ -42,7 +42,7 @@ class FaturamentoTreeview:
         self.tree.column("#2", width=100, anchor='c')
         self.tree.heading("#2", text="vendedor_usuario")
         
-        self.tree.column("#3", width=200, anchor='w')
+        self.tree.column("#3", width=200, anchor='c')
         self.tree.heading("#3", text="cliente_cpf")
         
         self.tree.column("#4", width=50, anchor='c')
