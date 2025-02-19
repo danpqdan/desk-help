@@ -128,6 +128,15 @@ class TelaProduto(tk.Frame):
             con.fechar()
         else:
             self.limpar()
+            
+    def baixa_estoque(self):
+        con = Database()
+        for child in self.tree.get_children():
+            codigo = str(self.tree.item(child)["values"][1])
+            quantidade = str(self.tree.item(child)["values"][3])
+            sql_text = f"UPDATE prodserv SET quantidade = quantidade - {quantidade} WHERE codigo = '{codigo}';"
+            print(sql_text)
+            con.gravar(sql_text)
 
     def menu(self):
         self.master.trocar_para_menu(self.vendedor, self.role)
