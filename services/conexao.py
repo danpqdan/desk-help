@@ -142,7 +142,7 @@ class Database:
         """Executa a inserção ou atualização no banco de dados."""
         try:
             with self.get_conexao() as session:
-                session.execute(sql_text, params)
+                session.execute(text(sql_text), params)
                 session.commit()
                 return True
         except SQLAlchemyError as e:
