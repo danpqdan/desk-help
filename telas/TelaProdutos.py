@@ -18,7 +18,29 @@ class TelaProduto(tk.Frame):
         self.create_widgets()    
     
     def create_widgets(self):
-        create_widgets_produto(self=self)   
+        create_widgets_produto(self=self)
+        
+        
+    def calcular(self, *args):
+        try:
+            custo = float(self.custo_var.get()) if self.custo_var.get() else None
+            porcentagem = float(self.porcentagem_var.get()) if self.porcentagem_var.get() else None
+            valor_final = float(self.valor_var.get()) if self.valor_var.get() else None
+
+            if custo is not None:
+                if porcentagem is not None and (valor_final is None or valor_final == custo + (custo * porcentagem / 100)):
+                    novo_valor = custo + (custo * porcentagem / 100)
+                    if self.valor_var.get() != f"{novo_valor:.2f}":
+                        self.valor_var.set(f"{novo_valor:.2f}")
+
+                elif valor_final is not None and (porcentagem is None or porcentagem == ((valor_final - custo) / custo) * 100):
+                    nova_porcentagem = ((valor_final - custo) / custo) * 100
+                    if self.porcentagem_var.get() != f"{nova_porcentagem:.2f}":
+                        self.porcentagem_var.set(f"{nova_porcentagem:.2f}")
+
+        except ValueError:
+            pass
+
         
     def limpar(self):
         self.txtcodigo.delete(0, "end")
@@ -120,20 +142,4 @@ class TelaProduto(tk.Frame):
                         print(f"Valor '{valor}' não encontrado na lista do Combobox.")
                         
 
-    def calcular(self, *args):
-        try:
-            custo = float(self.custo_var.get()) if self.custo_var.get() else 0
-            porcentagem = float(self.porcentagem_var.get()) if self.porcentagem_var.get() else None
-            valor_final = float(self.valor_var.get()) if self.valor_var.get() else None
-
-            if custo:
-                if porcentagem is not None and (args[0] == "porcentagem" or args[0] == "custo"):
-                    valor_final = custo + (custo * porcentagem / 100)
-                    self.valor_var.set(f"{valor_final:.2f}")
-
-                elif valor_final is not None and (args[0] == "valor" or args[0] == "custo"):
-                    porcentagem = ((valor_final - custo) / custo) * 100
-                    self.porcentagem_var.set(f"{porcentagem:.2f}")
-
-        except ValueError:
-            pass
+    

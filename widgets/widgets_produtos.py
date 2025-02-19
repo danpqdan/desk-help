@@ -49,13 +49,15 @@ def create_widgets_produto(self):
     lblcusto.place(relx=0.05, rely=0.20, width=90)
     self.txtcusto = tk.Entry(self.form, font=('Calibri', 12), textvariable=self.custo_var)
     self.txtcusto.place(relx=0.22, rely=0.20, width=90)
-    
+    self.txtcusto.bind("<KeyRelease>", lambda event: self.calcular())
+
     self.porcentagem_var = tk.StringVar()
     self.porcentagem_var.trace_add('write', self.calcular)
     lblporcentagem = tk.Label(self.form, text="Porcentagem:", bg="#D8EAF7", fg="black", font=('Calibri', 12), anchor='w')
     lblporcentagem.place(relx=0.39, rely=0.20, width=90)
     self.txtporcentagem = tk.Entry(self.form, font=('Calibri', 12), textvariable=self.porcentagem_var)
     self.txtporcentagem.place(relx=0.56, rely=0.20, width=90)
+    self.txtporcentagem.bind("<KeyRelease>", lambda event: self.calcular())
 
     self.valor_var = tk.StringVar()
     self.valor_var.trace_add('write', self.calcular)
@@ -63,6 +65,7 @@ def create_widgets_produto(self):
     lblvalor.place(relx=0.05, rely=0.26, width=90)
     self.txtvalor = tk.Entry(self.form, font=('Calibri', 12), textvariable=self.valor_var)
     self.txtvalor.place(relx=0.22, rely=0.26, width=90)
+    self.txtvalor.bind("<KeyRelease>", lambda event: self.calcular())
     
     lblquantidade = tk.Label(self.form, text="Quantidade:", bg="#D8EAF7", fg="black", font=('Calibri', 12), anchor='w')
     lblquantidade.place(relx=0.05, rely=0.32, width=90)
