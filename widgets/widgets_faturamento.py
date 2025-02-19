@@ -29,14 +29,14 @@ def create_widgets_faturamento(self):
     lbldatainicial = tk.Label(self.container_dados, text="Data inical:", font=('Calibri', 12, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
     lbldatainicial.place(relx=0.05, rely=0.3, width=100, height=20)
     
-    self.datainicial = tk.Entry(self.container_dados, font=('Calibri', 12), width=12, background='white')
-    self.datainicial.place(relx=0.15, rely=0.3, width=120, height=20)
+    self.txtdatainicial = tk.Entry(self.container_dados, font=('Calibri', 12), width=12, background='white')
+    self.txtdatainicial.place(relx=0.15, rely=0.3, width=120, height=20)
     
     lbldatafinal = tk.Label(self.container_dados, text="Data final:", font=('Calibri', 12, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
     lbldatafinal.place(relx=0.45, rely=0.3, width=100, height=20)
     
-    self.datafinal = tk.Entry(self.container_dados, font=('Calibri', 12), width=12, background='white')
-    self.datafinal.place(relx=0.55, rely=0.3, width=120, height=20)
+    self.txtdatafinal = tk.Entry(self.container_dados, font=('Calibri', 12), width=12, background='white')
+    self.txtdatafinal.place(relx=0.55, rely=0.3, width=120, height=20)
     
     lblvalortotal = tk.Label(self.container_dados, text="Valor total:", font=('Calibri', 12, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
     lblvalortotal.place(relx=0.05, rely=0.5, width=100, height=20)
@@ -72,18 +72,11 @@ def create_widgets_faturamento(self):
     self.cmbvendedor = ttk.Combobox(self.container_filtros, values=obter_vendedores, state="readonly")
     self.cmbvendedor.place(relx=0.35, rely=0.2, width=120, height=20)
     
-    self.boxtodosvendedores = ttk.Checkbutton(self.container_filtros, text="Todos os vendedores", variable=self.todos_vendedores,onvalue=True,offvalue=False)
-    self.boxtodosvendedores.place(relx=0.65, rely=0.2, width=140, height=20)
-    
     lblcliente = tk.Label(self.container_filtros, text='Por cliente', font=('Calibri', 12, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
     lblcliente.place(relx=0.05, rely=0.25, width=100, height=20)
     
     self.cliente = ttk.Combobox(self.container_filtros, values=obter_clientes, state="readonly")
     self.cliente.place(relx=0.35, rely=0.25, width=120, height=20)
-    
-    self.boxtodoscliente = ttk.Checkbutton(self.container_filtros, text="Todos clientes", variable=self.todos_clientes,onvalue=True,offvalue=False)
-    self.boxtodoscliente.place(relx=0.65, rely=0.25, width=140, height=20)
-    
     
     self.btnlimpar = tk.Button(self.container_filtros, text="LIMPAR", bg='#D8EAF7', border=1, relief="solid")
     self.btnlimpar.place(relx=0.5, rely=0.45, anchor="center", width=largura_personalizada - 25)
@@ -107,13 +100,13 @@ def obter_vendedores(self):
         try:
             con = Database()
             vendedores = con.encontrar_varios("SELECT usuario FROM vendedores")
-            self.vendedores = [vendedor[0] for vendedor in vendedores]
+            self.vendedores = ['Todos'] + [vendedor[0] for vendedor in vendedores]
             
             self.cmbvendedor['values'] = self.vendedores
 
         except Exception as e:
             print(f"Erro ao obter vendedores: {e}")
-            self.vendedores = []
+            self.vendedores = ['Recarregue']
             
             
 def obter_clientes(self):
@@ -121,11 +114,11 @@ def obter_clientes(self):
     try:
         con = Database()
         clientes = con.encontrar_varios("SELECT nome FROM clientes")
-        self.clientes = [cliente[0] for cliente in clientes]
+        self.clientes = ['Todos'] + [cliente[0] for cliente in clientes]
         
         # Atualiza o Combobox de clientes
         self.cliente['values'] = self.clientes
 
     except Exception as e:
         print(f"Erro ao obter clientes: {e}")
-        self.clientes = []
+        self.clientes = ['Recarregue']
