@@ -23,6 +23,9 @@ class ProdutoServico(Base):
     descricao = Column(String(255), nullable=False)
     tipo = Column(Enum(TipoProdutoServico), nullable=False)
     valor = Column(Float, nullable=False)
+    custo = Column(Float, nullable=True)
+    porcentagem = Column(Float, nullable=True)
+    quantidade = Column(Float, nullable=False)
     
     # Relacionamento reverso
     sacolas = relationship('SacolaProduto', back_populates='produto')
