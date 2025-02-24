@@ -7,7 +7,7 @@ from sqlalchemy import func, or_, text
 from model.Cliente import Cliente
 from model.ProdutoServico import ProdutoServico
 from model.Sacola import Sacola, SacolaProduto
-from services.imprimir import PedidoVenda
+from services.PedidoVenda import PedidoVenda
 from services.VendaTreeview import VendaSacolaTreeview
 from services.ClienteTreeview import ClienteTreeview
 from services.ProdutoTreeview import ProdutoTreeview
