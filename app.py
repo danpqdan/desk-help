@@ -50,7 +50,7 @@ class App(tk.Tk):
         self.exibir_frame("menu", vendedor, role)
 
     def trocar_para_login(self):
-        for frame_name in ["menu", "Tela de Faturamento"]:
+        for frame_name in ["menu", "Tela de Faturamento", "Tela de Vendas"]:
             if frame_name in self.frames:
                 self.frames[frame_name].destroy()
                 del self.frames[frame_name]
