@@ -1,8 +1,10 @@
+from datetime import datetime
 import tkinter as tk
 from sqlalchemy import and_, func, text
 from sqlalchemy.sql import text
 from model.Sacola import Sacola, SacolaProduto
 from services.FaturamentoTreeview import FaturamentoTreeview
+from services.RelatorioFaturamento import RelatorioFaturamento
 from services.conexao import Database
 from widgets.widgets_faturamento import create_widgets_faturamento, obter_vendedores
 
@@ -56,7 +58,7 @@ class TelaFaturamento(tk.Frame):
             
             query = query.group_by(Sacola.id, Sacola.vendedor_usuario, Sacola.cliente_cpf, Sacola.time_stamp)
             resultados = query.all()
-            
+
             self.filtrar_total(resultados)
             self.filtrar_ticket_medio(resultados)
             
@@ -132,6 +134,27 @@ class TelaFaturamento(tk.Frame):
 
         except Exception as e:
             print(f"Erro ao calcular o ticket médio: {e}")
+            
+            
+    def gerar_relatorio(self):
+        data_inicial = self.txtdatainicial.get().strip().replace('-', '/')
+        data_final = self.txtdatafinal.get().strip().replace('-', '/')
+        relatorio = RelatorioFaturamento(
+            self.vendedor,
+            data_inicial,
+            data_final,        
+            self.txtvalortotal,
+            self.txtticket,
+            self.cmbvendedor,
+            self.cliente,
+            self.tree
+        )
+        relatorio.imprimir_pdf()
+        
+    def menu(self):
+        self.con.close()
+        self.master.trocar_para_menu(self.vendedor, self.role)
+        
 
     
             

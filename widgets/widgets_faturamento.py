@@ -85,8 +85,11 @@ def create_widgets_faturamento(self):
     self.btnfiltrar = tk.Button(self.container_filtros, text="FILTRAR", bg='#D8EAF7', border=1, relief="solid", command=self.filtrar_dados)
     self.btnfiltrar.place(relx=0.5, rely=0.50, anchor="center", width=largura_personalizada - 25)
 
-    self.btnrelatorio = tk.Button(self.container_filtros, text="RELATORIO", bg='#D8EAF7', border=1, relief="solid")
+    self.btnrelatorio = tk.Button(self.container_filtros, text="RELATORIO", bg='#D8EAF7', border=1, relief="solid", command=self.gerar_relatorio)
     self.btnrelatorio.place(relx=0.5, rely=0.55, anchor="center", width=largura_personalizada - 25)
+    
+    self.menu = tk.Button(self.container_filtros, text="MENU", bg='#D8EAF7', border=1, relief="solid", command=self.menu)
+    self.menu.place(relx=0.5, rely=0.60, anchor="center", width=largura_personalizada - 25)
 
     
     
