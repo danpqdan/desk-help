@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import messagebox
 
 from sqlalchemy import text
+from model.ProdutoServico import ProdutoServico
 from services.ProdutoTreeview import ProdutoTreeview
 from services.conexao import Database
 import locale
@@ -13,6 +14,7 @@ class TelaProduto(tk.Frame):
     def __init__(self, master, vendedor, role):
         super().__init__(master)
         self.master = master
+        self.con = Database().SessionLocal()
         self.vendedor = vendedor
         self.role = role
         self.master.title('Tela de Produtos')
@@ -61,19 +63,17 @@ class TelaProduto(tk.Frame):
     def buscar(self):
         var_codigo = self.txtcodigo.get()
         con = Database()
-        sql_txt = f"select codigo, descricao, tipo, valor, custo, porcentagem, quantidade from produtos_servicos where codigo = :codigo"
-        rs = con.encontrar_um(sql_query=sql_txt, params={"codigo": var_codigo})
+        rs = self.con.query(ProdutoServico).filter(ProdutoServico.codigo == var_codigo).first()
 
         if rs:
-            codigo, descricao, tipo, valor, custo, porcentagem, quantidade = rs
             self.limpar()
-            self.txtcodigo.insert(0, codigo)
-            self.cmbtipo.insert(0, tipo)
-            self.txtdescricao.insert(0, descricao)
-            self.txtvalor.insert(0, valor)
-            self.txtcusto.insert(0, custo)
-            self.txtporcentagem.insert(0, porcentagem)
-            self.txtquantidade.insert(0, quantidade)
+            self.txtcodigo.insert(0, rs.codigo)
+            self.cmbtipo.insert(0, rs.tipo)
+            self.txtdescricao.insert(0, rs.descricao)
+            self.txtvalor.insert(0, rs.valor)
+            self.txtcusto.insert(0, rs.custo)
+            self.txtporcentagem.insert(0, rs.porcentagem)
+            self.txtquantidade.insert(0, rs.quantidade)
         else:
             messagebox.showwarning("Aviso", "Código não Encontrado", parent=self.master)
             self.limpar()
@@ -88,27 +88,32 @@ class TelaProduto(tk.Frame):
         var_porcentagem = self.porcentagem_var.get()
         var_quantidade = self.txtquantidade.get()
 
-        con = Database()
-        sql_txt = f"select * from produtos_servicos where codigo = :codigo"
 
-        rs = con.encontrar_um(sql_txt, params={"codigo": str(var_codigo)})
+        produto = self.con.query(ProdutoServico).filter(ProdutoServico.codigo == var_codigo).first()
 
-        if rs:
-            sql_text = "UPDATE produtos_servicos SET custo=:custo, porcentagem=:porcentagem, quantidade=:quantidade, tipo=:tipo, descricao=:descricao, valor=:valor WHERE codigo = :codigo"
+        if produto:
+                produto.tipo = var_tipo
+                produto.descricao = var_descricao
+                produto.valor = var_valor
+                produto.custo = var_custo
+                produto.quantidade = var_quantidade
+                produto.porcentagem = var_porcentagem
         else:
-            sql_text = "INSERT INTO produtos_servicos (codigo, tipo, descricao, valor, custo, quantidade, porcentagem) VALUES (:codigo, :tipo, :descricao, :valor, :custo, :quantidade, :porcentagem)"
-        
-        params = {
-            "codigo": var_codigo,
-            "tipo": var_tipo,
-            "descricao": var_descricao,
-            "valor": var_valor,
-            "custo": var_custo,
-            "quantidade": var_quantidade,
-            "porcentagem": var_porcentagem
-        }
+            novo_produto = ProdutoServico(
+                codigo=var_codigo,
+                tipo=var_tipo,
+                descricao=var_descricao,
+                valor=var_valor,
+                custo=var_custo,
+                quantidade=var_quantidade,
+                porcentagem=var_porcentagem
+            )
+            self.con.add(novo_produto)
 
-        if con.executar(sql_text=sql_text, params=params):
+        # Commit das alterações
+        self.con.commit()
+
+        if produto.codigo:
             messagebox.showinfo("Aviso", "Item Gravado com Sucesso", parent=self.master)
             self.limpar()
         else:
@@ -118,14 +123,14 @@ class TelaProduto(tk.Frame):
         var_del = messagebox.askyesno("Exclusão", "Tem certeza que deseja excluir?", parent=self.master)
         if var_del:
             var_codigo = self.txtcodigo.get()
-            con = Database()
-            sql_text = f"delete from produtos_servicos where codigo = '{var_codigo}'"
-            if con.executar(sql_text):
+            produto = self.con.query(ProdutoServico).filter(ProdutoServico.codigo == var_codigo).first()
+            if produto:
+                self.con.delete(produto)
+                self.con.commit()
                 messagebox.showinfo("Aviso", "Item Excluído com Sucesso", parent=self.master)
                 self.limpar()
             else:
                 messagebox.showerror("Erro", "Houve um Erro na Exclusão", parent=self.master)
-            con.fechar()
         else:
             self.limpar()
             

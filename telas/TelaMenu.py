@@ -36,7 +36,14 @@ class TelaMenu(tk.Frame):
         self.master.trocar_para_cliente(self.vendedor, self.role)
 
     def mostrar_produto(self):
-        self.master.trocar_para_produto(self.vendedor, self.role)
+        if self.validar_role():
+            self.master.trocar_para_produto(self.vendedor, self.role)
+        else:
+            validar = self.tela_alerta()
+            if validar:
+                self.master.trocar_para_produto(self.vendedor, self.role)
+            else:
+                messagebox.showinfo("Acesso negado", "Acesso não permitido.")
 
     def mostrar_vendas(self):
         self.master.trocar_para_vendas(self.vendedor, self.role)
