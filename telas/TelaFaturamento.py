@@ -2,6 +2,7 @@ from datetime import datetime
 import tkinter as tk
 from sqlalchemy import and_, func, text
 from sqlalchemy.sql import text
+from model.Cliente import Cliente
 from model.Sacola import Sacola, SacolaProduto
 from services.FaturamentoTreeview import FaturamentoTreeview
 from services.RelatorioFaturamento import RelatorioFaturamento
@@ -49,9 +50,9 @@ class TelaFaturamento(tk.Frame):
             if valido_vendedor and vendedor != 'Todos':
                 filtros.append(Sacola.vendedor_usuario == vendedor)
 
-            cpf, valido_cliente = self.filtrar_por_cliente()
-            if valido_cliente:
-                filtros.append(Sacola.cliente_cpf == cpf)
+            cliente, valido_cliente = self.filtrar_por_cliente()
+            if valido_cliente and cliente != 'Todos':
+                filtros.append(Sacola.cliente_cpf == cliente.cpf)
                 
             if filtros:
                 query = query.filter(and_(*filtros))
@@ -89,16 +90,12 @@ class TelaFaturamento(tk.Frame):
             return self.vendedores, False
         
     def filtrar_por_cliente(self):
-        cliente = self.cliente.get()
-        print(cliente)
-        con = Database()
-        if cliente:
-            query = f"SELECT cpf FROM clientes WHERE nome = '{cliente}'"
-            cpf = con.encontrar_um(query)
-            return cpf[0], True
-        else: 
-            cpf = con.encontrar_varios('select from clientes')
-            return self.clientes, False
+        cmbcliente = self.cliente.get()
+        if cmbcliente and cmbcliente != 'Todos':
+            cliente = self.con.query(Cliente).filter(Cliente.nome == cmbcliente).first()
+            return cliente, True
+        else:
+            return None, False    
         
     def filtrar_total(self, dados):
         try:
