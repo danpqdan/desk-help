@@ -8,11 +8,14 @@ from sqlalchemy import func, or_, text
 from model.Cliente import Cliente
 from model.ProdutoServico import ProdutoServico
 from model.Sacola import Sacola, SacolaProduto
+from model.Vendedor import Role
 from services.PedidoVenda import PedidoVenda
 from services.VendaTreeview import VendaSacolaTreeview
+from services.SacolaTreeview import SacolaTreeview
 from services.ClienteTreeview import ClienteTreeview
 from services.ProdutoTreeview import ProdutoTreeview
 from services.conexao import Database
+from telas.LoginPopup import LoginPopup
 from widgets.widgets_venda import create_widgets_vendas
 
 
@@ -36,22 +39,27 @@ class TelaVenda(tk.Frame):
         self.tree = VendaSacolaTreeview(self)
 
         
-    # def abrir_popup_busca_vendas(self):
-    #     popup_busca = tk.Toplevel(self.master)
-    #     popup_busca.title("Buscar vendas")
-    #     popup_busca.geometry(f"{self.master.winfo_screenwidth()}x{self.master.winfo_screenheight()}")
-    #     popup_busca.resizable(True, True)
-    #     tree = VendaTreeview(popup_busca)
-    #     tree.tree.place(x=0, y=0, width=self.master.winfo_screenwidth(), height=self.master.winfo_screenheight())
-    #     def handle_duplo_click(event):
-    #         valores = tree.duplo_click(event)
-    #         print(f"Dados selecionados: {valores}")
-    #         if valores:
-    #             self.txtsacolaid.delete(0, tk.END)
-    #             self.txtsacolaid.insert(0, valores[0])
-    #         popup_busca.destroy()
-    #         self.bus_venda(cod_compra=valores[0])
-    #     tree.tree.bind("<Double-1>", handle_duplo_click)
+    def abrir_popup_busca_vendas(self):
+        if self.validar_role():
+            popup_busca = tk.Toplevel(self.master)
+            popup_busca.title("Buscar vendas")
+            popup_busca.geometry(f"{self.master.winfo_screenwidth()}x{self.master.winfo_screenheight()}")
+            popup_busca.resizable(True, True)
+            tree = SacolaTreeview(popup_busca)
+            tree.tree.pack(fill="both", expand=True)
+            def handle_duplo_click(event):
+                valores = tree.duplo_click(event)
+                print(f"Dados selecionados: {valores}")
+                if valores:
+                    self.txtsacolaid.delete(0, tk.END)
+                    self.txtsacolaid.insert(0, valores[0])
+                popup_busca.destroy()
+                self.bus_venda(cod_compra=valores[0])
+            tree.tree.bind("<Double-1>", handle_duplo_click)
+            pass
+        else:
+            messagebox.showinfo("Acesso negado", "Acesso não permitido.")
+
         
 
     def abrir_popup_busca_cliente(self):
@@ -344,39 +352,39 @@ class TelaVenda(tk.Frame):
         self.con.commit()
             
             
-    # def bus_venda(self,cod_compra, event=None):
-    #     con = Database()
-    #     sql_txt = "SELECT id, cliente_cpf, vendedor_usuario FROM sacola WHERE num_venda = :cod_compra"
-    #     venda = con.encontrar_um(sql_txt, params={"cod_compra": cod_compra})
-    #     if venda:
-    #         sql_txt = '''SELECT A.lin_venda, A.codigo, B.descricao, A.quantidade, A.valor_unit, A.total
-    #          FROM sacola_produto A
-    #          JOIN produto B ON A.codigo = B.codigo
-    #          WHERE A.id = :venda_id
-    #          ORDER BY A.id, A.lin_venda'''
-    #         linha_venda = con.encontrar_varios(sql_txt, params={"venda_id": venda[0]})
-    #         if linha_venda:
-    #             for linha in self.tree.get_children():
-    #                 self.tree.delete(linha)
-    #             for linha in linha_venda:
-    #                 self.tree.insert("", tk.END, values=linha)
+    def bus_venda(self,cod_compra, event=None):
+        con = Database()
+        sql_txt = "SELECT id, cliente_cpf, vendedor_usuario FROM sacolas WHERE id = :cod_compra"
+        venda = con.encontrar_um(sql_txt, params={"cod_compra": cod_compra})
+        if venda:
+            sql_txt = '''SELECT A.lin_venda, A.produto_id, B.descricao, A.quantidade, A.valor_unit, A.total
+             FROM sacola_produto A
+             JOIN produtos_servicos B ON A.produto_id = B.codigo
+             WHERE A.sacola_id = :venda_id
+             ORDER BY A.sacola_id, A.lin_venda'''
+            linha_venda = con.encontrar_varios(sql_txt, params={"venda_id": venda[0]})
+            if linha_venda:
+                for linha in self.tree.tree.get_children():
+                    self.tree.tree.delete(linha)
+                for linha in linha_venda:
+                    self.tree.tree.insert("", tk.END, values=tuple(linha))
                     
-    #             # config num_venda
-    #             self.txtsacolaid.config(state="normal")
-    #             self.txtsacolaid.delete(0, "end")
-    #             self.txtsacolaid.insert(0, venda[0])
-    #             self.txtsacolaid.config(state="disabled")
-    #             #config txtclicpf
-    #             self.txtclicpf.config(state="normal")
-    #             self.txtclicpf.delete(0, "end")
-    #             self.txtclicpf.insert(0, venda[1])
-    #             self.txtclicpf.config(state="disabled")
-    #             self.bus_cli()
-    #             # config total_venda
-    #             self.txt_total.config(state="normal")
-    #             self.txt_total.delete(0, "end")
-    #             self.txt_total.insert(0, venda[2])
-    #             self.txt_total.config(state="disabled")
+                # config num_venda
+                self.txtsacolaid.config(state="normal")
+                self.txtsacolaid.delete(0, "end")
+                self.txtsacolaid.insert(0, venda[0])
+                self.txtsacolaid.config(state="disabled")
+                #config txtclicpf
+                self.txtclicpf.config(state="normal")
+                self.txtclicpf.delete(0, "end")
+                self.txtclicpf.insert(0, venda[1])
+                self.txtclicpf.config(state="disabled")
+                self.bus_cli()
+                # config total_venda
+                self.txt_total.config(state="normal")
+                self.txt_total.delete(0, "end")
+                self.txt_total.insert(0, venda[2])
+                self.txt_total.config(state="disabled")
             
     def bus_cli(self, event=None):
         var_codcli = self.txtclicpf.get()
@@ -451,3 +459,21 @@ class TelaVenda(tk.Frame):
     def hook_imprimir(self):
         pedido = PedidoVenda(self.vendedor, self.txtsacolaid, self.txtclicpf, self.txtnomecli, self.tree, self.txt_total)
         pedido.imprimir_pdf()
+        
+    def validar_role(self) -> bool:
+        """Verifica se o usuário tem uma role permitida."""
+        return self.role in {Role.ADMIN.value, Role.GERENTE.value}
+
+    def tela_alerta(self) -> bool:
+        """Solicita login adicional para acessar a tela, se necessário."""
+        var_sair = messagebox.askyesno("Permissões necessárias", "Solicite ao superior login para acesso...")
+        if var_sair:
+            login_popup = LoginPopup(self.master)
+            self.master.wait_window(login_popup.popup_busca)
+
+            if login_popup.login_sucesso:
+                return True
+            else:
+                messagebox.showinfo("Acesso negado", "Acesso não permitido.")
+                return False
+        return False

@@ -38,8 +38,7 @@ def create_widgets_vendas(self):
     btnbuscli = tk.Button(self.cabecalho, text="Buscar cliente", bg='black', foreground='white', font=('Calibri', 12, 'bold'), command=self.abrir_popup_busca_cliente)
     btnbuscli.place(relx=0.5, rely=0.6, width=120)
     
-    # , command=self.abrir_popup_busca_vendas
-    btnbusvendas = tk.Button(self.cabecalho, text="Buscar venda", bg='black', foreground='white', font=('Calibri', 12, 'bold'))
+    btnbusvendas = tk.Button(self.cabecalho, text="Buscar venda", bg='black', foreground='white', font=('Calibri', 12, 'bold'), command=self.abrir_popup_busca_vendas)
     btnbusvendas.place(relx=0.2, rely=0.6, width=120)
 
     # Widgets produtos
