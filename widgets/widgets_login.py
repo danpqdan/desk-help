@@ -1,10 +1,22 @@
 import tkinter as tk
 from tkinter import ttk
-# from PIL import Image, ImageTk
+from PIL import Image, ImageTk
+
 
 def create_widgets_login(self):
+    
     self.bg_label = tk.Label(self, bg="#D8EAF7")
     self.bg_label.pack(fill=tk.BOTH)
+    
+    image_path = "assets/help_desk_icon.jpg"
+    image = Image.open(image_path).resize(size=[300,200])
+    image = image.convert("RGBA")
+    tk_image = ImageTk.PhotoImage(image)
+    canvas = tk.Canvas(self, width=image.width, height=image.height, bg="#D8EAF7", border=None, bd=None, confine=None, highlightthickness=0 )
+    canvas.place(relx=0.5, rely=0.2, anchor=tk.CENTER)
+    canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
+
+
 
     self.form = tk.Frame(self, bg="#D8EAF7", width=400, height=250)
     self.form.place(relx=0.5, rely=0.5, anchor=tk.CENTER)

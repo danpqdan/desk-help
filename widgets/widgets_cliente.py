@@ -2,6 +2,7 @@ import platform
 import locale
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image, ImageTk
 from services.ClienteTreeview import ClienteTreeview
 
 def create_widgets_cliente(self):
@@ -12,6 +13,18 @@ def create_widgets_cliente(self):
     alturaTela = self.winfo_screenheight()
     self.bg_label = tk.Label(self, bg="#D8EAF7")
     self.bg_label.pack(fill=tk.BOTH, expand=True)
+    
+    red_larguraTela = larguraTela // 2
+    red_alturaTela = alturaTela // 2
+    image_path = "assets/help_desk_market.png"
+    image = Image.open(image_path)
+    image = image.resize((red_larguraTela, red_alturaTela), Image.LANCZOS)
+    image = image.convert("RGBA")
+    self.tk_image = ImageTk.PhotoImage(image)
+    canvas = tk.Canvas(self, bg="#D8EAF7", width=red_larguraTela, height=red_alturaTela, highlightthickness=0)
+    canvas.place(x=0, y=0)
+    canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_image)
+
     
     self.form = tk.Frame(self, bg="#D8EAF7", width=larguraTela/2, height=alturaTela)
     self.form.place(relx=1.0, rely=0.7, anchor='e')

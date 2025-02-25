@@ -1,10 +1,22 @@
 import tkinter as tk
 from tkinter import messagebox
-
-import tkinter as tk
+from PIL import Image, ImageTk
 
 def create_widgets_menu(self):
     """Cria os widgets do menu principal com melhor formatação."""
+    larguraTela = self.master.winfo_screenwidth()
+    alturaTela = self.master.winfo_screenheight()
+    red_larguraTela = larguraTela // 2
+    red_alturaTela = alturaTela // 2
+    
+    image_path = "assets/help_desk_icon.jpg"
+    image = Image.open(image_path)
+    image = image.resize((red_larguraTela, red_alturaTela), Image.LANCZOS)
+    image = image.convert("RGBA")
+    self.tk_image = ImageTk.PhotoImage(image)
+    canvas = tk.Canvas(self, bg="#D8EAF7", width=red_larguraTela, height=red_alturaTela, highlightthickness=0)
+    canvas.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+    canvas.create_image(red_larguraTela//2, red_alturaTela//2, anchor=tk.CENTER, image=self.tk_image)
     
     # Informações do Menu
     self.menu_info = tk.Label(

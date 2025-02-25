@@ -5,6 +5,8 @@ from tkcalendar import DateEntry
 import locale
 from services.FaturamentoTreeview import FaturamentoTreeview
 from services.conexao import Database
+from PIL import Image, ImageTk
+
 
 def create_widgets_faturamento(self):
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -15,6 +17,9 @@ def create_widgets_faturamento(self):
     largura_personalizada = larguraTela / 3
     altura_personalizada = alturaTela / 3
     largura_aside = larguraTela - largura_personalizada
+    
+    red_larguraTela = int(largura_personalizada)
+    red_alturaTela =  int(altura_personalizada)
 
     self.container_filtros = tk.Frame(self, bg="#D8EAF7", width=largura_personalizada, height=alturaTela, bd=2, relief="solid")
     self.container_filtros.pack(side="right", fill="y") 
@@ -54,6 +59,14 @@ def create_widgets_faturamento(self):
     lblinformativo = tk.Label(self.container_filtros, text="Filtros:", font=('Calibri', 16, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
     lblinformativo.place(relx=0.5, rely=0.05, anchor='center', width=200, height=20)
     
+    image_path = "assets/help_desk_data.png"
+    image = Image.open(image_path)
+    image = image.resize((red_larguraTela, red_alturaTela), Image.LANCZOS)
+    self.tk_image = ImageTk.PhotoImage(image)
+    canvas = tk.Canvas(self.container_filtros, bg="black", width=red_larguraTela, height=red_alturaTela, highlightthickness=0)
+    canvas.place(relx=0.5, rely=1.0, anchor=tk.S)
+    canvas.create_image(red_larguraTela // 2, red_alturaTela // 2, anchor=tk.CENTER, image=self.tk_image)
+
     lbldatainicial = tk.Label(self.container_filtros, text="Data inical:", font=('Calibri', 12, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
     lbldatainicial.place(relx=0.05, rely=0.1, width=100, height=20)
     

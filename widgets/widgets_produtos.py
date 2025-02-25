@@ -3,6 +3,8 @@ import locale
 import tkinter as tk
 from tkinter import ttk
 from services.ProdutoTreeview import ProdutoTreeview
+from PIL import Image, ImageTk
+
 
 def create_widgets_produto(self):
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -10,16 +12,28 @@ def create_widgets_produto(self):
     self.larguraTela = self.master.winfo_screenwidth()
     self.alturaTela = self.master.winfo_screenheight()
     self.master.geometry(f'{self.larguraTela}x{self.alturaTela}+0+0')
-    
     self.master.title("Help-desk - Cadastro de Produtos/Serviços")
+    limite_campo = self.master.register(self.limitar_tamanho)
+    
+    
     
     self.bg_label = tk.Label(self, bg="#D8EAF7")
     self.bg_label.pack(fill=tk.BOTH, expand=True)
     
+    red_larguraTela = self.larguraTela // 2
+    red_alturaTela = self.alturaTela // 2
+    
+    image_path = "assets/help_desk_market.png"
+    image = Image.open(image_path)
+    image = image.resize((red_larguraTela, red_alturaTela), Image.LANCZOS)
+    image = image.convert("RGBA")
+    self.tk_image = ImageTk.PhotoImage(image)
+    canvas = tk.Canvas(self, bg="#D8EAF7", width=red_larguraTela, height=red_alturaTela, highlightthickness=0)
+    canvas.place(x=0, y=0)
+    canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_image)
+
     self.form = tk.Frame(self, bg="#D8EAF7", width=self.larguraTela/2, height=self.alturaTela)
     self.form.place(relx=1.0, rely=0, anchor='ne')
-
-    limite_campo = self.master.register(self.limitar_tamanho)
 
     lblcodigo = tk.Label(self.form, text="Codigo:", bg="#D8EAF7", fg="black", font=('Calibri', 12), anchor='w')
     lblcodigo.place(relx=0.05, rely=0.02, width=90)

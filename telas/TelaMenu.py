@@ -15,7 +15,6 @@ class TelaMenu(tk.Frame):
         self.role = role
         self.config(bg="#D8EAF7")
         self.master.title("Menu Principal")
-        # self.geometry(f'{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0')
 
         self.frames = {}
         self.create_widgets()
