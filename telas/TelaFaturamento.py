@@ -1,3 +1,4 @@
+from datetime import datetime
 import tkinter as tk
 from sqlalchemy import and_, func, text
 from sqlalchemy.sql import text
@@ -136,17 +137,23 @@ class TelaFaturamento(tk.Frame):
             
             
     def gerar_relatorio(self):
+        data_inicial = self.txtdatainicial.get().strip().replace('-', '/')
+        data_final = self.txtdatafinal.get().strip().replace('-', '/')
         relatorio = RelatorioFaturamento(
             self.vendedor,
-            self.txtdatainicial,
-            self.txtdatafinal,
+            data_inicial,
+            data_final,        
             self.txtvalortotal,
             self.txtticket,
             self.cmbvendedor,
             self.cliente,
-            self.tree.tree
+            self.tree
         )
         relatorio.imprimir_pdf()
+        
+    def menu(self):
+        self.con.close()
+        self.master.trocar_para_menu(self.vendedor, self.role)
         
 
     
