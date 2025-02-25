@@ -12,7 +12,7 @@ class LoginPopup:
         self.popup_busca.title("Buscar Cliente")
         self.popup_busca.geometry(f"{self.master.winfo_screenwidth()//2}x{self.master.winfo_screenheight()//2}")
         self.popup_busca.resizable(True, True)
-        self.config(bg="#D8EAF7")
+        self.popup_busca.config(bg="#D8EAF7")
         self.login_sucesso = False
         
         self.form = tk.Frame(self.popup_busca, bg="#D8EAF7", width=400, height=250)

@@ -46,7 +46,7 @@ class TelaMenu(tk.Frame):
         if self.validar_role():
             self.master.trocar_para_faturamento(self.vendedor, self.role)
         else:
-            validar = self.tela_alerta()  # Removido o argumento errado
+            validar = self.tela_alerta()
             if validar:
                 self.master.trocar_para_faturamento(self.vendedor, self.role)
             else:
