@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 from sqlalchemy import text
 from services.conexao import Database
@@ -123,9 +124,19 @@ class ProdutoTreeview:
 
         self.tree.heading(col_id, command=lambda: self.ordenar_coluna(col_id, not reverse))
     
+    def duplo_click_invalido(self, event):
+        item_selecionado = self.tree.selection()
+        if item_selecionado:
+            valores = self.tree.item(item_selecionado[0], "values")
+            if int(valores[6]) <= 0:
+                messagebox.showwarning("Aviso", "Quantidade insulficiente", parent=self.parent)
+            else:
+                return valores
+            
     def duplo_click(self, event):
         item_selecionado = self.tree.selection()
         if item_selecionado:
             valores = self.tree.item(item_selecionado[0], "values")
-            return valores 
-        return []
+            return valores
+        else:
+            []

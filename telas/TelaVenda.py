@@ -89,8 +89,8 @@ class TelaVenda(tk.Frame):
         tree = ProdutoTreeview(popup_busca)
         tree.tree.pack(fill="both", expand=True)
 
-        def handle_duplo_click(event):
-            valores = tree.duplo_click(event)
+        def duplo_click_invalido(event):
+            valores = tree.duplo_click_invalido(event)
             print(f"Dados selecionados: {valores}")
             if valores:
                 self.txtcodprod.delete(0, tk.END)
@@ -99,7 +99,7 @@ class TelaVenda(tk.Frame):
             popup_busca.destroy()
             self.txtclicpf.focus()
             self.bus_prod()
-        tree.tree.bind("<Double-1>", handle_duplo_click)
+        tree.tree.bind("<Double-1>", duplo_click_invalido)
 
     def numeracao(self):
         self.txtsacolaid.config(state="normal")
@@ -232,6 +232,11 @@ class TelaVenda(tk.Frame):
             self.txtqtde.focus_set()
             return
         
+        
+        if not self.baixa_estoque(var_codprod, int(var_qtde)):
+            messagebox.showerror("Erro", "Item não adicionado erro no estoque.", parent=self.master)
+            return
+                        
         try:
             sacola_produto = SacolaProduto(
                 sacola_id=num_venda,
@@ -241,6 +246,7 @@ class TelaVenda(tk.Frame):
                 total=var_valor,
                 session=self.con
             )
+            
             self.con.add(sacola_produto)
             self.con.commit()
             if sacola_produto.lin_venda:
@@ -269,6 +275,7 @@ class TelaVenda(tk.Frame):
         self.con.commit()
         
         if lin_deletada:
+            self.repor_estoque(produto_id=item['values'][1], quantidade=int(item['values'][3]))
             self.tree.visualizar()
             self.total()
             print(f"{lin_deletada} registros deletados com sucesso.")
@@ -316,40 +323,60 @@ class TelaVenda(tk.Frame):
 
             
     def gravar(self):
-        num_venda = self.txtsacolaid.get()
-        clicpf = self.txtclicpf.get()
-        
-        venda_db = self.con.query(Sacola).filter(Sacola.id == num_venda).first()
-
-        if self.validar_cab():
-            if venda_db:
-                venda_db.cliente_cpf = clicpf
-                venda_db.vendedor_usuario = self.vendedor
-                venda_db.time_stamp = datetime.now()
-                self.con.commit()
-                self.baixa_estoque()
-
-                messagebox.showinfo("Sucesso", f"{self.vendedor}, dados atualizados com sucesso", parent=self.master)
-                var_del = messagebox.askyesno("Imprimir", "Deseja Imprimir a Venda?", parent=self.master)
-                if var_del:
-                    self.hook_imprimir()
-                var_continuar = messagebox.askyesno("Continuar", "Deseja incluir nova Venda?", parent=self.master)
-                if var_continuar:
-                    self.nova_sacola()
-                else:
-                    self.numeracao()
-        else:
-            messagebox.showwarning("Aviso", "Favor preencher os campos do cabeçalho", parent=self.master)
+        var_continuar = messagebox.askyesno("Continuar", "Esse processo encerrará a venda. Continuar?", parent=self.master)
+        if var_continuar:
+            num_venda = self.txtsacolaid.get()
+            clicpf = self.txtclicpf.get()
             
-    def baixa_estoque(self):
-        con = Database()
-        for child in self.tree.tree.get_children():
-            codigo = str(self.tree.tree.item(child)["values"][1])
-            quantidade = str(self.tree.tree.item(child)["values"][3])
-            self.con.query(ProdutoServico).filter(ProdutoServico.codigo == codigo).update(
+            venda_db = self.con.query(Sacola).filter(Sacola.id == num_venda).first()
+
+            if self.validar_cab():
+                if venda_db:
+                    venda_db.cliente_cpf = clicpf
+                    venda_db.vendedor_usuario = self.vendedor
+                    venda_db.time_stamp = datetime.now()
+
+
+                    self.con.commit()
+                    self.btngravar.config(state="disabled")
+                    self.btncancelar.config(state="disabled")
+                    messagebox.showinfo("Sucesso", f"{self.vendedor}, dados atualizados com sucesso", parent=self.master)
+                    var_del = messagebox.askyesno("Imprimir", "Deseja Imprimir a Venda?", parent=self.master)
+                    if var_del:
+                        self.hook_imprimir()
+                        self.numeracao()
+                    else:
+                        self.numeracao()
+            else:
+                messagebox.showwarning("Aviso", "Favor preencher os campos do cabeçalho", parent=self.master)
+        else:
+            pass
+
+            
+    def baixa_estoque(self, produto_id, quantidade):
+        try:
+
+            produto = self.con.query(ProdutoServico).filter(ProdutoServico.codigo == produto_id).first()
+            
+            if produto is None:
+                messagebox.showerror("Erro", f"Produto com código {produto_id} não encontrado.")
+                self.con.rollback()
+                return
+            
+            if produto.quantidade < quantidade:
+                messagebox.showerror("Erro", f"Estoque insuficiente para o produto {produto.descricao}. Quantidade: {produto.quantidade}")
+                self.con.rollback()
+                return
+
+            self.con.query(ProdutoServico).filter(ProdutoServico.codigo == produto_id).update(
                 {ProdutoServico.quantidade: ProdutoServico.quantidade - quantidade}
             )
-        self.con.commit()
+
+            self.con.commit()
+            return True
+        except Exception as e:
+            self.con.rollback()
+            messagebox.showerror("Erro", f"Erro ao atualizar o estoque: {e}")
             
             
     def bus_venda(self,cod_compra, event=None):
@@ -442,14 +469,65 @@ class TelaVenda(tk.Frame):
         var_del = messagebox.askyesno("Cancelar", "Deseja Cancelar a Venda?", parent=self.master)
         if var_del:
             sacola_id = self.txtsacolaid.get()
-            sql = "DELETE * FROM sacola_produto where sacola_id = :sacola_id "
-            self.con.query(SacolaProduto).filter(SacolaProduto.sacola_id == sacola_id).delete()
-            self.limpar()
-            self.limpar_cab()
-            self.numeracao()
-            self.tree.visualizar()
-            self.total()
-            self.txtsacolaid.config(state="disabled")
+            sacola = self.con.query(Sacola).filter(Sacola.id == sacola_id).first()
+
+            if not sacola:
+                messagebox.showerror("Erro", "Sacola não encontrada.", parent=self.master)
+                return
+
+            try:
+                self.repor_estoque(sacola_id=sacola_id)
+                self.con.delete(sacola)
+                self.con.commit()
+                
+                messagebox.showinfo("Sucesso", "Venda cancelada com sucesso.", parent=self.master)
+                self.limpar()
+                self.limpar_cab()
+                self.numeracao()
+                self.tree.visualizar()
+                self.total()
+                self.txtsacolaid.config(state="disabled")
+
+            except Exception as e:
+                self.con.rollback()
+                messagebox.showerror("Erro", f"Erro ao cancelar a venda: {e}", parent=self.master)
+
+                
+                
+    def repor_estoque(self, sacola_id=None, produto_id=None, quantidade=None):
+        """Repõe o estoque ao cancelar uma venda ou repõe o estoque de um único produto."""
+        try:
+            if produto_id and quantidade is not None:
+                produto = self.con.query(ProdutoServico).filter(ProdutoServico.codigo == produto_id).first()
+                
+                if produto:
+                    produto.quantidade += quantidade
+                    self.con.commit()
+                    messagebox.showinfo("Sucesso", f"Estoque do produto {produto_id} reposto com sucesso.", parent=self.master)
+                else:
+                    messagebox.showwarning("Aviso", f"Produto com código {produto_id} não encontrado.", parent=self.master)
+                    
+                return
+            
+            elif sacola_id:
+                produtos_venda = self.con.query(SacolaProduto).filter(SacolaProduto.sacola_id == sacola_id).all()
+
+                if not produtos_venda:
+                    messagebox.showwarning("Aviso", "Nenhum produto encontrado para reposição de estoque.", parent=self.master)
+                    return
+
+                for item in produtos_venda:
+                    produto = self.con.query(ProdutoServico).filter(ProdutoServico.codigo == item.produto_id).first()
+                    if produto:
+                        produto.quantidade += item.quantidade
+
+                self.con.commit()
+                messagebox.showinfo("Sucesso", "Estoque reposto com sucesso.", parent=self.master)
+
+        except Exception as e:
+            self.con.rollback()
+            messagebox.showerror("Erro", f"Erro ao repor o estoque: {e}", parent=self.master)
+
 
     
     def menu(self):

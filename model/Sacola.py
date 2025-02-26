@@ -9,7 +9,7 @@ class Sacola(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     vendedor_usuario = Column(String(255), ForeignKey('vendedores.usuario'), nullable=False)
     cliente_cpf = Column(String(11), ForeignKey('clientes.cpf'), nullable=False)
-    produtos = relationship('SacolaProduto', back_populates='sacola')
+    produtos = relationship('SacolaProduto', back_populates='sacola', cascade='all, delete-orphan')
     time_stamp = Column(DateTime, default=lambda: datetime.now(UTC))
 
     def __init__(self, vendedor_id, cliente_id, produtos=None):
@@ -24,7 +24,7 @@ class Sacola(Base):
 class SacolaProduto(Base):
     __tablename__ = 'sacola_produto'
 
-    sacola_id = Column(Integer, ForeignKey('sacolas.id'), primary_key=True)
+    sacola_id = Column(Integer, ForeignKey('sacolas.id', ondelete="CASCADE"), primary_key=True)
     produto_id = Column(String(13), ForeignKey('produtos_servicos.codigo'), primary_key=True)
     lin_venda = Column(Integer, primary_key=True)
     quantidade = Column(Integer, nullable=False)
