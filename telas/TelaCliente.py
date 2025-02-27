@@ -4,6 +4,8 @@ import tkinter as tk
 from tkinter import messagebox
 
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from model.Cliente import Cliente
 from services.conexao import Database
 from widgets.widgets_cliente import create_widgets_cliente
 
@@ -11,6 +13,7 @@ class TelaCliente(tk.Frame):
     def __init__(self, master, vendedor, role):
         super().__init__(master)
         self.master = master
+        self.db = Database()
         self.vendedor = vendedor
         self.role = role
         self.create_widgets()
@@ -25,66 +28,70 @@ class TelaCliente(tk.Frame):
         self.txtemail.delete(0, "end")
 
     def buscar(self):
-        var_cpf = self.txtcpf.get()
+        var_cpf = self.txtcpf.get().strip()
         self.txtcpf.delete(0, "end")
-
-        con = Database()
-        sql_txt = f"select cpf, nome, telefone, email from clientes where cpf = :cpf"
-        params = var_cpf
-        rs = con.encontrar_um(sql_txt, params=params)
-        if rs:
-            self.txtcpf.insert(0, rs[0])
-            self.txtnome.insert(0, rs[1])
-            self.txttelefone.insert(0, rs[2])
-            self.txtemail.insert(0, rs[3])
-        else:
-            messagebox.showwarning("Aviso", "Código não Encontrado", parent=self.master)
-            self.limpar()
-            self.txtcpf.focus_set()
+        with self.db.get_conexao() as session:
+            try:
+                rs = session.query(Cliente).filter(Cliente.cpf == var_cpf).first()
+                if rs:
+                    self.txtcpf.insert(0, rs.cpf)
+                    self.txtnome.insert(0, rs.nome)
+                    self.txttelefone.insert(0, rs.telefone)
+                    self.txtemail.insert(0, rs.email)
+                else:
+                    messagebox.showwarning("Aviso", "Cliente não encontrado.", parent=self.master)
+                    self.limpar()
+                    self.txtcpf.focus_set()
+            except SQLAlchemyError as e:
+                messagebox.showerror("Erro", "Ocorreu um erro ao buscar o cliente.", parent=self.master)
+                print(f"Erro ao buscar cliente: {e}")
+                self.limpar()
+                self.txtcpf.focus_set()
 
     def gravar(self):
         var_cpf = self.txtcpf.get()
         var_nome = self.txtnome.get()
         var_telefone = self.txttelefone.get()
         var_email = self.txtemail.get()
+        
+        with self.db.get_conexao() as session:
+            try:
+                rs = session.query(Cliente).filter(Cliente.cpf == var_cpf).first()
+                
+                if rs:
+                    rs.nome = var_nome
+                    rs.telefone = var_telefone
+                    rs.email = var_email
+                else:
+                    cliente = Cliente(cpf=var_cpf, nome=var_nome, telefone=var_telefone, email=var_email)
+                    session.add(cliente)
 
-        con = Database()
-        sql_txt = "SELECT cpf, nome, telefone, email FROM clientes WHERE cpf = :cpf"
-        params = {"cpf": var_cpf}
-        rs = con.encontrar_um(sql_txt, params)
-
-        if rs:
-            sql_text = "UPDATE clientes SET nome = :nome, telefone = :telefone, email = :email WHERE cpf = :cpf"
-        else:
-            sql_text = "INSERT INTO clientes (cpf, nome, telefone, email) VALUES (:cpf, :nome, :telefone, :email)"
-        params = {
-            "cpf": var_cpf,
-            "nome": var_nome,
-            "telefone": var_telefone,
-            "email": var_email
-        }
-
-        if con.executar(sql_text, params):
-            messagebox.showinfo("Aviso", "Item Gravado com Sucesso", parent=self.master)
-            self.limpar()
-        else:
-            messagebox.showerror("Erro", "Houve um Erro na Gravação", parent=self.master)
+                messagebox.showinfo("Aviso", "Item Gravado com Sucesso", parent=self.master)
+                self.limpar()
+            
+            except SQLAlchemyError as e:
+                session.rollback()
+                messagebox.showerror("Erro", f"Houve um Erro na Gravação: {e}", parent=self.master)
+                print(f"Erro ao gravar cliente: {e}")
+                self.limpar()
 
     def excluir(self):
         var_del = messagebox.askyesno("Exclusão", "Tem certeza que deseja excluir?", parent=self.master)
         if var_del:
             var_cpf = self.txtcpf.get()
-
-            con = Database()
-            sql_text = f"delete from clientes where cpf = :cpf"
-            params = var_cpf
-            if con.executar(sql_text, params):
-                messagebox.showinfo("Aviso", "Item Excluido com Sucesso", parent=self.master)
-                self.limpar()
-            else:
-                messagebox.showerror("Erro", "Houve um Erro na Exclusão", parent=self.master)
-
-            self.limpar()
+            with self.db.get_conexao() as session:
+                try:
+                    rs = session.query(Cliente).filter(Cliente.cpf == var_cpf).first()
+                    if rs:
+                        session.delete(rs)
+                        messagebox.showinfo("Aviso", "Item Excluído com Sucesso", parent=self.master)
+                        self.limpar()
+                    else:
+                        messagebox.showerror("Erro", "Cliente não encontrado", parent=self.master)
+                        self.limpar()
+                except SQLAlchemyError as e:
+                    messagebox.showerror("Erro", "Ocorreu um erro interno. Tente novamente.", parent=self.master)
+                    print(f"Erro ao buscar cliente: {e}")   
         else:
             self.limpar()
 
