@@ -1,9 +1,11 @@
+import sys
 import time
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from datetime import date
 import os
 import platform
+from services.router_path import help_desk_pasta
 
 class RelatorioFaturamento:
     def __init__(self, vendedor, txtdatainicial, txtdatafinal, txtvalortotal, txtticket, cmbvendedor, cliente, tree):
@@ -16,19 +18,43 @@ class RelatorioFaturamento:
         self.cliente = cliente
         self.tree = tree
 
+    def gerar_pdf_path(self):
+        """Gera o caminho do arquivo PDF dinamicamente no mesmo diretório do executável"""
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        reports_dir = os.path.join(base_dir, 'relatorios')
+
+        try:
+            os.makedirs(reports_dir, exist_ok=True)
+            print(f"Pasta criada: {reports_dir}")
+        except Exception as e:
+            print(f"Erro ao criar pasta: {e}")
+
+        today = date.today().strftime("%Y-%m-%d")
+        pdf_filename = f"relatorio_faturamento_{today}.pdf"
+        pdf_path = os.path.join(reports_dir, pdf_filename)
+
+        print(f"Arquivo será salvo em: {pdf_path}")
+
+        return pdf_path
+
     def imprimir_pdf(self):
+        pdf_path = self.gerar_pdf_path()
+
         today = date.today()
         d3 = today.strftime("%d/%m/%y")
-        icon = 'assets/pasta.png'
 
-        cnv = canvas.Canvas("relatorio_faturamento.pdf", pagesize=A4)
+        cnv = canvas.Canvas(pdf_path, pagesize=A4)
         width, height = A4
-        
+
         def desenhar_cabecalho():
             # Cabeçalho do PDF
             cnv.setFont('Times-Roman', 14)
             cnv.setFillColorRGB(0, 0, 255)
-            cnv.drawImage(icon, 10, height - 50, width=50, height=50, mask='auto')
+            cnv.drawImage(help_desk_pasta, 10, height - 50, width=50, height=50, mask='auto')
             cnv.setFont('Times-Roman', 14)
             cnv.setFillColorRGB(0, 0, 255)
             cnv.drawString(70, 810, "Desk-help")
@@ -84,6 +110,7 @@ class RelatorioFaturamento:
         cnv.save()
 
         if platform.system() == "Windows":
-            os.startfile('relatorio_faturamento.pdf')
+            os.startfile(pdf_path)
         else:
-            os.system(f"xdg-open relatorio_faturamento.pdf")
+            os.system(f"xdg-open {pdf_path}")
+
