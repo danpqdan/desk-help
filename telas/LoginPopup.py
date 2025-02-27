@@ -14,6 +14,7 @@ class LoginPopup:
         self.popup_busca.resizable(True, True)
         self.popup_busca.config(bg="#D8EAF7")
         self.login_sucesso = False
+        self.db = Database()
         
         self.form = tk.Frame(self.popup_busca, bg="#D8EAF7", width=400, height=250)
         self.form.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
@@ -47,35 +48,29 @@ class LoginPopup:
         """Valida as credenciais de login"""
         var_usuario = self.txtusuario.get()
         var_senha = self.txtsenha.get()
-        
-        try:
-            db = Database()
-            con = db.get_conexao()
-            if not con:
-                raise ConnectionError("Não foi possível conectar ao banco de dados.")
 
-            sql_txt = "SELECT usuario, senha, role FROM vendedores WHERE usuario = :vendedor"
-            params = {'vendedor': var_usuario}
-            rs = db.encontrar_um(sql_query=sql_txt, params=params)
-            
-            if rs:
-                db_usuario, db_senha_hash, role = rs
-                if Vendedor.verificar_senha(var_senha, db_senha_hash):
+        with self.db.get_conexao() as session:
+            try:
+                rs = session.query(Vendedor).filter(Vendedor.usuario == var_usuario).first()
 
-                    if role in [Role.ADMIN.value, Role.GERENTE.value]:
+                if rs and Vendedor.verificar_senha(var_senha, rs.senha):
+                    if rs.role in [Role.ADMIN, Role.GERENTE]:
                         self.fechar()
                         self.login_sucesso = True
                         messagebox.showinfo("Login", "Acesso concedido!")
                         self.popup_busca.destroy()
                         return self.login_sucesso
-                    return False
                 else:
-                    lblresult = tk.Label(self.form, text="Usuário ou Senha Inválida", foreground='red', bg='#D8EAF7')
-                    lblresult.place(relx=0.2, y=150)
-            else:
-                lblresult = tk.Label(self.form, text="Usuário ou Senha Inválida", foreground='red', bg='#D8EAF7')
-                lblresult.place(relx=0.2, y=150)
-        except Exception as e:
-            print(f"Erro: {e}")
+                    self.mostrar_mensagem_erro("Usuário ou Senha Inválida")
+
+                return False
+
+            except Exception as e:
+                print(f"Erro: {e}")
+
+    def mostrar_mensagem_erro(self, mensagem):
+        """Exibe uma mensagem de erro na interface"""
+        lblresult = tk.Label(self.form, text=mensagem, foreground='red', bg='#D8EAF7')
+        lblresult.place(relx=0.2, y=150)
 
 
