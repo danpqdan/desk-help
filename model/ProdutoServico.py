@@ -1,6 +1,6 @@
 import re
 import enum
-from sqlalchemy import Column, String, Float, Enum
+from sqlalchemy import Column, Integer, String, Float, Enum
 from sqlalchemy.orm import relationship
 from services.base import Base
 
@@ -25,19 +25,27 @@ class ProdutoServico(Base):
     valor = Column(Float, nullable=False)
     custo = Column(Float, nullable=True)
     porcentagem = Column(Float, nullable=True)
-    quantidade = Column(Float, nullable=False)
+    quantidade = Column(Integer, nullable=False)
     
     # Relacionamento reverso
     sacolas = relationship('SacolaProduto', back_populates='produto')
     
-    def __init__(self, codigo, descricao, tipo, valor):
+    def __init__(self, codigo, descricao, tipo, valor, custo, porcentagem, quantidade):
         self.codigo = self.validar_codigo_barras(codigo, tipo)
         self.descricao = descricao
         self.tipo = TipoProdutoServico.validar_tipo(tipo)
         self.valor = self.converter_valor(valor)
+        self.custo = custo
+        self.porcentagem = porcentagem
+        self.quantidade = quantidade
+        
         
     def __repr__(self):
         return f"<ProdutoSacola(Codigo={self.codigo}, descrição={self.descricao}, tipo={self.tipo}, valor={self.valor})>"
+    
+    def get_values(self):
+        return (self.codigo, self.descricao, self.tipo.name, self.valor, self.custo, self.porcentagem, self.quantidade)
+    
 
 
     @staticmethod
