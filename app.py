@@ -1,4 +1,5 @@
 import tkinter as tk
+
 from telas.TelaVenda import TelaVenda
 from telas.TelaCliente import TelaCliente
 from telas.TelaProdutos import TelaProduto
@@ -6,7 +7,6 @@ from telas.TelaMenu import TelaMenu
 from telas.TelaLogin import TelaLogin
 from telas.TelaFaturamento import TelaFaturamento
 from services.conexao import Database
-from widgets.widgets_menu import create_widgets_menu
 
 class App(tk.Tk):
     def __init__(self):
