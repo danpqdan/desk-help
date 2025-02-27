@@ -3,9 +3,12 @@ from tkinter import ttk
 from sqlalchemy import text
 from tkcalendar import DateEntry
 import locale
+from model.Cliente import Cliente
+from model.Vendedor import Vendedor
 from services.FaturamentoTreeview import FaturamentoTreeview
 from services.conexao import Database
 from PIL import Image, ImageTk
+from services.router_path import help_desk_data as data
 
 
 def create_widgets_faturamento(self):
@@ -59,8 +62,7 @@ def create_widgets_faturamento(self):
     lblinformativo = tk.Label(self.container_filtros, text="Filtros:", font=('Calibri', 16, 'bold'), bg='#D8EAF7', fg='black', anchor='w')
     lblinformativo.place(relx=0.5, rely=0.05, anchor='center', width=200, height=20)
     
-    image_path = "assets/help_desk_data.png"
-    image = Image.open(image_path)
+    image = Image.open(data)
     image = image.resize((red_larguraTela, red_alturaTela), Image.LANCZOS)
     self.tk_image = ImageTk.PhotoImage(image)
     canvas = tk.Canvas(self.container_filtros, bg="black", width=red_larguraTela, height=red_alturaTela, highlightthickness=0)
@@ -112,12 +114,12 @@ def create_widgets_faturamento(self):
 
 
 def obter_vendedores(self):
-        """Recupera os vendedores do banco de dados"""
+    """Recupera os vendedores do banco de dados"""
+    con = Database()
+    with con.get_conexao() as session:
         try:
-            con = Database()
-            vendedores = con.encontrar_varios("SELECT usuario FROM vendedores")
+            vendedores = session.query(Vendedor.usuario).all()
             self.vendedores = ['Todos'] + [vendedor[0] for vendedor in vendedores]
-            
             self.cmbvendedor['values'] = self.vendedores
 
         except Exception as e:
@@ -127,14 +129,13 @@ def obter_vendedores(self):
             
 def obter_clientes(self):
     """Recupera os clientes do banco de dados"""
-    try:
-        con = Database()
-        clientes = con.encontrar_varios("SELECT nome FROM clientes")
-        self.clientes = ['Todos'] + [cliente[0] for cliente in clientes]
-        
-        # Atualiza o Combobox de clientes
-        self.cliente['values'] = self.clientes
+    con = Database()
+    with con.get_conexao() as session:
+        try:
+            clientes = session.query(Cliente.nome).all()
+            self.clientes = ['Todos'] + [cliente[0] for cliente in clientes]
+            self.cliente['values'] = self.clientes
 
-    except Exception as e:
-        print(f"Erro ao obter clientes: {e}")
-        self.clientes = ['Recarregue']
+        except Exception as e:
+            print(f"Erro ao obter clientes: {e}")
+            self.clientes = ['Recarregue']

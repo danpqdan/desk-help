@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
+from services.router_path import help_desk_icon as icon
 
 def create_widgets_menu(self):
     """Cria os widgets do menu principal com melhor formatação."""
@@ -9,8 +10,7 @@ def create_widgets_menu(self):
     red_larguraTela = larguraTela // 2
     red_alturaTela = alturaTela // 2
     
-    image_path = "assets/help_desk_icon.jpg"
-    image = Image.open(image_path)
+    image = Image.open(icon)
     image = image.resize((red_larguraTela, red_alturaTela), Image.LANCZOS)
     image = image.convert("RGBA")
     self.tk_image = ImageTk.PhotoImage(image)

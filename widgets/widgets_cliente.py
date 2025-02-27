@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 from services.ClienteTreeview import ClienteTreeview
+from services.router_path import help_desk_market as market
 
 def create_widgets_cliente(self):
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -16,8 +17,7 @@ def create_widgets_cliente(self):
     
     red_larguraTela = larguraTela // 2
     red_alturaTela = alturaTela // 2
-    image_path = "assets/help_desk_market.png"
-    image = Image.open(image_path)
+    image = Image.open(market)
     image = image.resize((red_larguraTela, red_alturaTela), Image.LANCZOS)
     image = image.convert("RGBA")
     self.tk_image = ImageTk.PhotoImage(image)

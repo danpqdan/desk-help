@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 from services.ProdutoTreeview import ProdutoTreeview
 from PIL import Image, ImageTk
+from services.router_path import help_desk_market as market
 
 
 def create_widgets_produto(self):
@@ -23,8 +24,7 @@ def create_widgets_produto(self):
     red_larguraTela = self.larguraTela // 2
     red_alturaTela = self.alturaTela // 2
     
-    image_path = "assets/help_desk_market.png"
-    image = Image.open(image_path)
+    image = Image.open(market)
     image = image.resize((red_larguraTela, red_alturaTela), Image.LANCZOS)
     image = image.convert("RGBA")
     self.tk_image = ImageTk.PhotoImage(image)
