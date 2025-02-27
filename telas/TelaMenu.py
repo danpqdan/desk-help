@@ -63,7 +63,7 @@ class TelaMenu(tk.Frame):
 
     def validar_role(self) -> bool:
         """Verifica se o usuário tem uma role permitida."""
-        return self.role in {Role.ADMIN.value, Role.GERENTE.value}
+        return self.role in {Role.ADMIN, Role.GERENTE}
 
     def tela_alerta(self) -> bool:
         """Solicita login adicional para acessar a tela, se necessário."""
