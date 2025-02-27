@@ -1,20 +1,48 @@
 from contextlib import contextmanager
 import os
+import sys
+from dotenv import load_dotenv
 import pandas as pd
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
-
+import urllib
+from services.base import Base
 from model.Cliente import Cliente
 from model.ProdutoServico import ProdutoServico
 from model.Vendedor import Vendedor
+from services.router_path import help_desk_modelo_os
+
 
 class Database:
     def __init__(self):
-        self.database_url = f"mysql+pymysql://{os.getenv('USUARIO_DB')}:{os.getenv('SENHA_DB')}@localhost/{os.getenv('NOME_BANCO')}"
+        self.carregar_env()
+        senha_codificada = urllib.parse.quote_plus(str(self.senha_db))
+        self.database_url = f"mysql+pymysql://{self.usuario_db}:{senha_codificada}@localhost/{self.nome_banco}"
         self.engine = create_engine(self.database_url, echo=True, pool_pre_ping=True)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
+    def carregar_env(self):
+        """Carrega o arquivo .env correto dependendo do contexto do script"""
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        dotenv_path = os.path.join(base_dir, '../.env')
+        
+        if not os.path.exists(dotenv_path):
+            raise FileNotFoundError(f"Arquivo .env não encontrado no diretório: {dotenv_path}")
+
+        load_dotenv(dotenv_path=dotenv_path)
+
+        self.usuario_db = os.getenv("USUARIO_DB")
+        self.senha_db = os.getenv("SENHA_DB")
+        self.nome_banco = os.getenv("NOME_BANCO")
+
+        if not all([self.usuario_db, self.senha_db, self.nome_banco]):
+            raise ValueError("As variáveis de ambiente do banco de dados não foram carregadas corretamente.")
+        
     def criar_tabelas(self):
         """Cria todas as tabelas no banco de dados se não existirem"""
         from services.base import Base
@@ -40,8 +68,8 @@ class Database:
         """Converte uma planilha para o banco de dados"""
         try:
             with self.get_conexao() as session:
-                clientes = pd.read_excel('assets/Planilha Modelo de Ordem de Serviço.xlsx', sheet_name='Clientes', header=1)
-                produtos = pd.read_excel('assets/Planilha Modelo de Ordem de Serviço.xlsx', sheet_name='Produtos e Serviços', header=1)
+                clientes = pd.read_excel(help_desk_modelo_os, sheet_name='Clientes', header=1)
+                produtos = pd.read_excel(help_desk_modelo_os, sheet_name='Produtos e Serviços', header=1)
 
                 # Evita inserir dados duplicados
                 if session.query(Cliente).first() is None:
@@ -61,32 +89,3 @@ class Database:
 
         except Exception as e:
             print(f"Erro na conversão de planilha: {e}")
-
-    def encontrar_um(self, sql_query: str, params: dict = None):
-        """Executa uma consulta SQL e retorna um resultado"""
-        try:
-            with self.get_conexao() as session:
-                return session.execute(text(sql_query), params).fetchone()
-        except SQLAlchemyError as e:
-            print(f"Erro ao executar consulta: {e}")
-            return None
-
-    def encontrar_varios(self, sql_query: str, params: dict = None):
-        """Executa uma consulta SQL e retorna múltiplos resultados"""
-        try:
-            with self.get_conexao() as session:
-                resultado = session.execute(text(sql_query), params).fetchall()
-                return resultado
-        except SQLAlchemyError as e:
-            print(f"Erro ao executar consulta: {e}")
-            return []
-
-    def executar(self, sql_text: str, params: dict = None):
-        """Executa um comando SQL (INSERT, UPDATE, DELETE)"""
-        try:
-            with self.get_conexao() as session:
-                session.execute(text(sql_text), params)
-                return True
-        except SQLAlchemyError as e:
-            print(f"Erro ao executar a Query: {e}")
-            return False
