@@ -29,7 +29,7 @@ class Database:
         else:
             base_dir = os.path.dirname(os.path.abspath(__file__))
 
-        dotenv_path = os.path.join(base_dir, '../.env')
+        dotenv_path = os.path.join(base_dir, '.env')
         
         if not os.path.exists(dotenv_path):
             raise FileNotFoundError(f"Arquivo .env não encontrado no diretório: {dotenv_path}")
