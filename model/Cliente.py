@@ -14,11 +14,14 @@ class Cliente(Base):
     def __repr__(self):
         return f"Cliente(cpf={self.cpf}, nome={self.nome}, telefone={self.telefone}, email={self.email})"
     
-    def __init__(self, cpf, nome, telefone, email):
+    def __init__(self, cpf:String, nome:String, telefone:String, email:String):
         self.cpf = self.limpar_cpf(cpf)
         self.nome = nome
         self.telefone = self.formatar_telefone(telefone)
-        self.email = self.validar_email(email)    
+        self.email = self.validar_email(email)
+        
+    def get_values(self):
+        return (self.cpf, self.nome, self.telefone, self.email)
     
     @staticmethod
     def limpar_cpf(cpf: str) -> str:
