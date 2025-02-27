@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from sqlalchemy import text
+from model.Cliente import Cliente
 from services.conexao import Database
 
 class ClienteTreeview:
@@ -12,6 +13,7 @@ class ClienteTreeview:
         self.parent.update_idletasks()
         self.larguraTela = self.parent.winfo_screenwidth()
         self.alturaTela = self.parent.winfo_screenheight()
+        self.db = Database()
         self.criar_treeview_produto()
 
     def criar_treeview_produto(self):
@@ -70,33 +72,30 @@ class ClienteTreeview:
         self.visualizar()
 
     def visualizar(self):
-        con=Database()
-        sql_txt = "SELECT * FROM clientes ORDER BY nome"
-        rs=con.encontrar_varios(sql_txt)
-
-        self.tree.bind("<Double-1>", self.duplo_click)
-
-        for linha in self.tree.get_children():
-            self.tree.delete(tuple(linha))
-
-        for linha in rs:
-            self.tree.insert("", tk.END, values=tuple(linha))
-
-    def pesquisar_nome(self, p):
-        con = Database()
-        try:
-            sql_txt = f"select * from clientes where nome like '%{p}%'"
-            rs = con.encontrar_varios(sql_txt)
-
+        with self.db.get_conexao() as session:
+            rs = session.query(Cliente).all()
+            self.tree.bind("<Double-1>", self.duplo_click)
             for linha in self.tree.get_children():
                 self.tree.delete(linha)
 
             for linha in rs:
-                self.tree.insert("", tk.END, values=tuple(linha))
-        except:
-            print(f'Conexão indisponivel...')
+                self.tree.insert("", tk.END, values=linha.get_values())
+
+    def pesquisar_nome(self, p):
+        with self.db.get_conexao() as session:
+            try:
+                rs = session.query(Cliente).filter(Cliente.nome.ilike(f"%{p}%")).all()
+                for linha in self.tree.get_children():
+                    self.tree.delete(linha)
+
+                for cliente in rs:
+                    self.tree.insert("", tk.END, values=cliente.get_values())
+
+            except Exception as e:
+                print(f'Erro ao pesquisar: {e}')
 
         return True
+
     
     def ordenar_coluna(self, col_id: str, reverse: bool) -> None:
         """Função para ordenar a coluna selecionada."""

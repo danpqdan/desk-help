@@ -1,6 +1,9 @@
 from tkinter import messagebox, ttk
 import tkinter as tk
 from sqlalchemy import text
+from sqlalchemy.orm import aliased
+from model.ProdutoServico import ProdutoServico
+from model.Sacola import SacolaProduto
 from services.conexao import Database
 
 class VendaSacolaTreeview:
@@ -11,6 +14,7 @@ class VendaSacolaTreeview:
         self.tela_venda.update_idletasks()
         self.larguraTela = self.tela_venda.winfo_screenwidth()
         self.alturaTela = self.tela_venda.winfo_screenheight()
+        self.db = Database()
         self.criar_treeview_venda()
         
     def criar_treeview_venda(self):
@@ -55,23 +59,46 @@ class VendaSacolaTreeview:
         
         self.visualizar()
         
+    from sqlalchemy.orm import aliased
+
     def visualizar(self):
-        con = Database()
         num_venda = self.tela_venda.txtsacolaid.get()
         print("Num_venda", num_venda)
-        sql_txt = '''SELECT A.lin_venda, A.produto_id, B.descricao, A.quantidade, A.valor_unit, A.total
-                 FROM sacola_produto A
-                 JOIN produtos_servicos B ON A.produto_id = B.codigo
-                 WHERE A.sacola_id = :sacola_id
-                 ORDER BY A.sacola_id, A.lin_venda'''
-        rs = con.encontrar_varios(sql_txt, {'sacola_id': num_venda})
-        if rs is None:
-            messagebox.showerror("Erro", "Não foi possível consultar as vendas.")
-            return
-        for linha in self.tree.get_children():
-            self.tree.delete(linha)
-        for linha in rs:
-            self.tree.insert("", tk.END, values=tuple(linha))
+        
+        sacola_produto = aliased(SacolaProduto)
+        produtos_servicos = aliased(ProdutoServico)
+        
+        with self.db.get_conexao() as session:
+            try:
+                results = session.query(
+                    sacola_produto.lin_venda,
+                    sacola_produto.produto_id,
+                    produtos_servicos.descricao,
+                    sacola_produto.quantidade,
+                    produtos_servicos.valor,
+                    sacola_produto.total,
+                ).join(
+                    produtos_servicos, sacola_produto.produto_id == produtos_servicos.codigo
+                ).filter(
+                    sacola_produto.sacola_id == num_venda
+                ).order_by(
+                    sacola_produto.sacola_id, sacola_produto.lin_venda
+                ).all()
+                
+                if not results:
+                    return None
+
+                for linha in self.tree.get_children():
+                    self.tree.delete(linha)
+
+                for linha in results:
+                    self.tree.insert("", tk.END, values=tuple(linha))
+
+            except Exception as e:
+                print(f"Erro: {e}")
+                messagebox.showerror("Erro", "Não foi possível consultar as vendas.")
+
+
             
     def limpar_arv(self):
         for linha in self.tree.get_children():
@@ -92,8 +119,3 @@ class VendaSacolaTreeview:
             valores = self.tree.item(item_selecionado[0], "values")
             return valores 
         return []
-
-
-class SacolaTreeView:
-    def __init__(self):
-        pass

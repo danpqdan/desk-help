@@ -65,10 +65,11 @@ class SacolaTreeview:
             Cliente.nome.label("cliente_nome"),
             func.max(SacolaProduto.quantidade).label("max_quantidade"),
             func.sum(SacolaProduto.total).label("total"),
-            Sacola.time_stamp.label("Horario")
-        ).join(Cliente, Cliente.cpf == Sacola.cliente_cpf
-        ).join(SacolaProduto, Sacola.id == SacolaProduto.sacola_id
-        ).group_by(Sacola.id, Cliente.nome, Sacola.vendedor_usuario, Sacola.time_stamp).all()
+            Sacola.time_stamp.label("Horario")) \
+            .join(Cliente, Cliente.cpf == Sacola.cliente_cpf)\
+            .join(SacolaProduto, Sacola.id == SacolaProduto.sacola_id)\
+            .group_by(Sacola.id, Cliente.nome, Sacola.vendedor_usuario, Sacola.time_stamp)\
+            .all()
 
         if not sacola:
             messagebox.showerror("Erro", "Não foi possível consultar as vendas.")

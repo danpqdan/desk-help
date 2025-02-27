@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 
 from sqlalchemy import text
+from model.ProdutoServico import ProdutoServico
 from services.conexao import Database
 
 class ProdutoTreeview:
@@ -13,6 +14,7 @@ class ProdutoTreeview:
         self.parent.update_idletasks()
         self.larguraTela = self.parent.winfo_screenwidth()
         self.alturaTela = self.parent.winfo_screenheight()
+        self.db =Database()
         self.criar_treeview_produto()
 
     def criar_treeview_produto(self):
@@ -79,33 +81,29 @@ class ProdutoTreeview:
         self.visualizar()
 
     def visualizar(self):
-        con=Database()
-        sql_txt = "select * from produtos_servicos order by descricao"
-        rs=con.encontrar_varios(sql_txt)
-
-        self.tree.bind("<Double-1>", self.duplo_click)
-
-        for linha in self.tree.get_children():
-            self.tree.delete(tuple(linha))
-
-        for linha in rs:
-            self.tree.insert("", tk.END, values=tuple(linha))
-
-    def pesquisar_nome(self, p):
-        con = Database()
-        try:
-            sql_txt = f"select * from produtos_servicos where descricao like '%{p}%'"
-            rs = con.encontrar_varios(sql_txt)
+        with self.db.get_conexao() as session:
+            rs = session.query(ProdutoServico).order_by(ProdutoServico.descricao).all()
+            self.tree.bind("<Double-1>", self.duplo_click)
 
             for linha in self.tree.get_children():
                 self.tree.delete(linha)
 
             for linha in rs:
-                self.tree.insert("", tk.END, values=tuple(linha))
-        except:
-            print(f'Conexão indisponivel...')
+                self.tree.insert("", tk.END, values=linha.get_values())
 
-        return True
+    def pesquisar_nome(self, p):
+        with self.db.get_conexao() as session:
+            try:
+                rs = session.query(ProdutoServico).filter(ProdutoServico.descricao.ilike(f"%{p}%")).all()
+                for linha in self.tree.get_children():
+                    self.tree.delete(linha)
+
+                for linha in rs:
+                    self.tree.insert("", tk.END, values=linha.get_values())
+            except:
+                print(f'Conexão indisponivel...')
+
+            return True
     
     def ordenar_coluna(self, col_id: str, reverse: bool) -> None:
         """Função para ordenar a coluna selecionada."""
